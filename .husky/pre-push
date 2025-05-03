@@ -1,0 +1,19 @@
+#!/bin/sh
+BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
+
+# Allow env branches to pass
+if echo "$BRANCH_NAME" | grep -Eq "^env/"; then
+  exit 0
+fi
+
+# Allowed branch format: <type>/<description>
+if echo "$BRANCH_NAME" | grep -Eq "^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test)/[a-z0-9._-]+$"; then
+  echo "✅ Branch name '$BRANCH_NAME' follows the convention."
+  exit 0
+else
+  echo "❌ ERROR: Invalid branch name '$BRANCH_NAME'."
+  echo "➡️  Use the format: <type>/<description>"
+  echo "Allowed types: build, chore, ci, docs, feat, fix, perf, refactor, revert, style, test"
+  exit 1
+fi
+
