@@ -7,7 +7,8 @@
     "start": "nodemon src/index.js",
     "lint": "eslint \"src/**/*.js\"",
     "format": "prettier --write \"src/**/*.js\"",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "test": "echo \"No tests specified - skipping tests\" && exit 0"
   },
   "keywords": [],
   "author": "",
