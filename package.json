@@ -3,8 +3,10 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "scripts": {
-    "start": "nodemon src/index.js"
+"scripts": {
+  "start": "nodemon src/index.js",
+  "lint": "eslint \"src/**/*.js\"",
+  "format": "prettier --write \"src/**/*.js\""
   },
   "keywords": [],
   "author": "",
@@ -24,8 +26,15 @@
     "@babel/core": "^7.23.7",
     "@babel/preset-env": "^7.23.7",
     "@babel/register": "^7.23.7",
+    "@eslint/js": "^9.26.0",
     "@types/node": "^22.15.3",
+    "eslint": "^9.26.0",
+    "eslint-config-prettier": "^10.1.2",
+    "eslint-plugin-prettier": "^5.2.6",
+    "globals": "^16.0.0",
     "nodemon": "^3.1.9",
-    "typescript": "^5.8.3"
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.31.1"
   }
 }
