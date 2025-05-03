@@ -1,5 +1,5 @@
-const logger = require("./winston");
-const { badRequest } = require("../constants/statusCodes");
+const logger = require('./winston');
+const { badRequest } = require('../constants/statusCodes');
 
 const validator = (req, res, next) => {
   // No creation date is allowed to pass through
@@ -10,7 +10,7 @@ const validator = (req, res, next) => {
 
   try {
     for (let [key, value] of Object.entries(req.body)) {
-      if (value === "") {
+      if (value === '') {
         value = null;
         req.body[key] = value;
         continue;
@@ -20,7 +20,7 @@ const validator = (req, res, next) => {
     next();
   } catch (error) {
     logger.error(error);
-    res.status(badRequest).json({ error: "Bad request" });
+    res.status(badRequest).json({ error: 'Bad request' });
   }
 };
 

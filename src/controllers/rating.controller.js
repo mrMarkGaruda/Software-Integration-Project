@@ -1,7 +1,7 @@
-const pool = require("../boot/database/db_connect");
-const logger = require("../middleware/winston");
-const statusCodes = require("../constants/statusCodes");
-const ratingModel = require("../models/ratingModel");
+const pool = require('../boot/database/db_connect');
+const logger = require('../middleware/winston');
+const statusCodes = require('../constants/statusCodes');
+const ratingModel = require('../models/ratingModel');
 
 const addRating = async (req, res) => {
   const { movieId } = req.params;
@@ -10,7 +10,7 @@ const addRating = async (req, res) => {
   let movie_id = parseInt(movieId);
 
   if (isNaN(movie_id) || !rating) {
-    res.status(statusCodes.badRequest).json({ message: "Missing parameters" });
+    res.status(statusCodes.badRequest).json({ message: 'Missing parameters' });
   } else {
     try {
       const ratingObj = new ratingModel({
@@ -29,16 +29,16 @@ const addRating = async (req, res) => {
       );
 
       console.log(averageRating, typeof averageRating);
-      await pool.query("UPDATE movies SET rating = $1 WHERE movie_id = $2;", [
+      await pool.query('UPDATE movies SET rating = $1 WHERE movie_id = $2;', [
         averageRating,
         movie_id,
       ]);
-      res.status(statusCodes.success).json({ message: "Rating added" });
+      res.status(statusCodes.success).json({ message: 'Rating added' });
     } catch (error) {
       logger.error(error.stack);
       res
         .status(statusCodes.queryError)
-        .json({ error: "Exception occurred while adding rating" });
+        .json({ error: 'Exception occurred while adding rating' });
     }
   }
 };

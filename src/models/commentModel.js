@@ -1,28 +1,28 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 const commentSchema = new mongoose.Schema(
   {
     movie_id: {
       type: Number,
-      required: [true, "movie is required"],
+      required: [true, 'movie is required'],
     },
     username: {
       type: String,
-      required: [true, "username is required"],
+      required: [true, 'username is required'],
     },
     comment: {
       type: String,
-      required: [true, "comment is required"],
+      required: [true, 'comment is required'],
     },
     title: {
       type: String,
-      required: [true, "title is required"],
+      required: [true, 'title is required'],
     },
     rating: {
       type: Number,
       min: 0,
       max: 5,
-      required: [true, "rating is required"],
+      required: [true, 'rating is required'],
     },
     downvotes: {
       type: Number,
@@ -37,9 +37,9 @@ const commentSchema = new mongoose.Schema(
   },
   {
     timestamps: {
-      createdAt: "created_at",
+      createdAt: 'created_at',
     },
   }
 );
 
-module.exports = mongoose.model("Comment", commentSchema);
+module.exports = mongoose.model('Comment', commentSchema);
