@@ -24,6 +24,8 @@
     "@babel/core": "^7.23.7",
     "@babel/preset-env": "^7.23.7",
     "@babel/register": "^7.23.7",
-    "nodemon": "^3.1.9"
+    "@types/node": "^22.15.3",
+    "nodemon": "^3.1.9",
+    "typescript": "^5.8.3"
   }
 }
