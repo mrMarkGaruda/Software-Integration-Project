@@ -1,5 +1,5 @@
-const pg = require("pg");
-const logger = require("../../middleware/winston");
+const pg = require('pg');
+const logger = require('../../middleware/winston');
 
 const db_config = {
   user: process.env.DB_USER,
@@ -22,14 +22,14 @@ function startConnection() {
 
   db_connection.connect((err, client) => {
     if (!err) {
-      logger.info("PostgreSQL Connected");
+      logger.info('PostgreSQL Connected');
     } else {
-      logger.error("PostgreSQL Connection Failed");
+      logger.error('PostgreSQL Connection Failed');
     }
   });
 
-  db_connection.on("error", (err, client) => {
-    logger.error("Unexpected error on idle client");
+  db_connection.on('error', (err, client) => {
+    logger.error('Unexpected error on idle client');
     startConnection();
   });
 }

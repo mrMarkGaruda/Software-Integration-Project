@@ -1,9 +1,9 @@
 // const appRoot = require("app-root-path");
-const winston = require("winston");
+const winston = require('winston');
 // define the custom settings for each transport
 const options = {
   file: {
-    level: "info",
+    level: 'info',
     filename: `./logs/app.log`,
     handleException: true,
     maxSize: 5242880, // about 5MB
@@ -14,7 +14,7 @@ const options = {
     ),
   },
   console: {
-    level: "debug",
+    level: 'debug',
     handleException: true,
     format: winston.format.combine(
       winston.format.colorize(),

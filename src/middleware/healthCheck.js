@@ -1,8 +1,8 @@
-const router = require("express").Router();
+const router = require('express').Router();
 
-router.get("/api/health", (req, res) => {
+router.get('/api/health', (req, res) => {
   res.status(200).json({
-    message: "All up and running !!",
+    message: 'All up and running !!',
   });
 });
 

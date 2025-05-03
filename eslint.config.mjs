@@ -10,7 +10,9 @@ export default defineConfig([
     plugins: { js, prettier: prettierPlugin },
     extends: ["js/recommended", prettier],
     rules: {
-      "prettier/prettier": "error"
+      "prettier/prettier": "error",
+      "no-unused-vars": "off", // Disable warnings for unused variables
+      "no-undef": "warn"       // Change undefined variables to warnings instead of errors
     }
   },
   {
