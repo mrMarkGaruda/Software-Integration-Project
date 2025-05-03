@@ -5,10 +5,17 @@
   "main": "index.js",
   "scripts": {
     "start": "nodemon src/index.js",
+    "build": "mkdir -p dist && cp -r src/* dist/",
+    "dev": "nodemon src/index.js",
     "lint": "eslint \"src/**/*.js\"",
+    "lint:fix": "eslint \"src/**/*.js\" --fix",
     "format": "prettier --write \"src/**/*.js\"",
     "prepare": "husky install",
-    "test": "echo \"No tests specified - skipping tests\" && exit 0"
+    "test": "echo \"No tests specified - skipping tests\" && exit 0",
+    "clean": "rm -rf dist",
+    "prebuild": "npm run clean",
+    "postbuild": "echo \"Build completed successfully\"",
+    "serve": "node dist/index.js"
   },
   "keywords": [],
   "author": "",
@@ -51,5 +58,8 @@
     "*.{json,md,css,html}": [
       "prettier --write"
     ]
+  },
+  "engines": {
+    "node": ">=16.0.0"
   }
 }
