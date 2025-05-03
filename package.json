@@ -6,7 +6,8 @@
   "scripts": {
     "start": "nodemon src/index.js",
     "lint": "eslint \"src/**/*.js\"",
-    "format": "prettier --write \"src/**/*.js\""
+    "format": "prettier --write \"src/**/*.js\"",
+    "prepare": "husky install"
   },
   "keywords": [],
   "author": "",
@@ -26,15 +27,28 @@
     "@babel/core": "^7.23.7",
     "@babel/preset-env": "^7.23.7",
     "@babel/register": "^7.23.7",
+    "@commitlint/config-conventional": "^19.8.0",
     "@eslint/js": "^9.26.0",
     "@types/node": "^22.15.3",
+    "commitlint": "^19.8.0",
     "eslint": "^9.26.0",
     "eslint-config-prettier": "^10.1.2",
     "eslint-plugin-prettier": "^5.2.6",
     "globals": "^16.0.0",
+    "husky": "^8.0.3",
+    "lint-staged": "^15.5.1",
     "nodemon": "^3.1.9",
     "prettier": "^3.5.3",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.31.1"
+  },
+  "lint-staged": {
+    "*.{js,ts,tsx,jsx}": [
+      "eslint --cache --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,css,html}": [
+      "prettier --write"
+    ]
   }
 }
