@@ -5,17 +5,17 @@
   "main": "index.js",
   "scripts": {
     "start": "nodemon src/index.js",
-    "build": "mkdir -p dist && cp -r src/* dist/",
-    "dev": "nodemon src/index.js",
-    "lint": "eslint \"src/**/*.js\"",
-    "lint:fix": "eslint \"src/**/*.js\" --fix",
-    "format": "prettier --write \"src/**/*.js\"",
+    "build": "npm run clean && tsc",
+    "dev": "nodemon --watch src --exec \"tsc && node src/index.js\"",
+    "lint": "eslint \"src/**/*.{js,ts}\"",
+    "lint:fix": "eslint \"src/**/*.{js,ts}\" --fix",
+    "format": "prettier --write \"src/**/*.{js,ts}\"",
     "prepare": "husky install",
     "test": "echo \"No tests specified - skipping tests\" && exit 0",
-    "clean": "rm -rf dist",
+    "clean": "rimraf dist",
     "prebuild": "npm run clean",
     "postbuild": "echo \"Build completed successfully\"",
-    "serve": "node dist/index.js"
+    "serve": "node src/index.js"
   },
   "keywords": [],
   "author": "",
@@ -47,6 +47,7 @@
     "lint-staged": "^15.5.1",
     "nodemon": "^3.1.9",
     "prettier": "^3.5.3",
+    "rimraf": "^5.0.5",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.31.1"
   },

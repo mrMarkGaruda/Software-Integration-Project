@@ -5,3 +5,5 @@ coverage/
 .vscodes
 .DS_Store
 .env
+.eslintcache
+logs
