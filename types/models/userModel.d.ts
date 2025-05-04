@@ -1,17 +1,21 @@
-import mongoose, { Document, Model } from 'mongoose';
+import { Document, Model, Schema, Types } from 'mongoose';
 
-export interface IUser extends Document {
-  username: string;
+interface IUser {
+  username?: string;
   email: string;
   password: string;
-  messages: mongoose.Types.ObjectId[];
+  messages: Types.ObjectId[];
   created_at?: Date;
   updated_at?: Date;
 }
 
-/**
- * Mongoose model for User.
- */
-declare const userModel: Model<IUser>;
+interface IUserDocument extends IUser, Document {}
 
-export default userModel;
+interface IUserModel extends Model<IUserDocument> {
+  // Add any static methods here
+}
+
+declare const UserModel: IUserModel;
+
+export default UserModel;
+export { IUser, IUserDocument };
