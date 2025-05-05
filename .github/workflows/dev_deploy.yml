@@ -1,0 +1,33 @@
+name: CI/CD - Development
+
+on:
+  push:
+    branches: [dev]
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - uses: actions/setup-node@v4.4.0
+        with:
+          node-version: '18'
+      - run: |
+          npm ci
+          npm run build
+      - run: |
+          printf "NODE_ENV=development\nDB_URL=%s\nJWT_SECRET=%s\n" "${{ secrets.DEV_DB_URL }}" "${{ secrets.DEV_JWT_SECRET }}" > .env
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ secrets.DEV_SERVER }}
+          username: ${{ secrets.DEV_SSH_USER }}
+          key: ${{ secrets.DEV_SSH_KEY }}
+          script: |
+            cd /var/app
+            npm ci
+            npx pm2 restart all
