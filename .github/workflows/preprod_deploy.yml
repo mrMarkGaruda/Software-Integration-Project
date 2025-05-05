@@ -12,8 +12,8 @@ jobs:
   prepare:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4.2.2
+      - uses: actions/setup-node@v4.4.0
         with:
           node-version: '18'
       - run: |
@@ -21,7 +21,7 @@ jobs:
           npm run build
       - run: |
           printf "NODE_ENV=preproduction\nDB_URL=%s\nJWT_SECRET=%s\n" "${{ secrets.PPROD_DB_URL }}" "${{ secrets.PPROD_JWT_SECRET }}" > .env
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v3.1.4
         with:
           name: preprod-build
           path: |
@@ -32,7 +32,7 @@ jobs:
     needs: prepare
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v3.1.4
         with:
           name: preprod-build
       - name: Deploy via SSH
