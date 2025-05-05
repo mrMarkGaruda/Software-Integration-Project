@@ -4,25 +4,26 @@ on:
   push:
     branches: [pprod]
 
+permissions:
+  contents: read
+  id-token: write
+
 jobs:
   prepare:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
           node-version: '18'
-          cache: 'npm'
       - run: |
           npm ci
           npm run build
-          echo "NODE_ENV=preproduction" >> .env
-          echo "DB_URL=${{ secrets.PPROD_DB_URL }}" >> .env
-          echo "JWT_SECRET=${{ secrets.PPROD_JWT_SECRET }}" >> .env
+      - run: |
+          printf "NODE_ENV=preproduction\nDB_URL=%s\nJWT_SECRET=%s\n" "${{ secrets.PPROD_DB_URL }}" "${{ secrets.PPROD_JWT_SECRET }}" > .env
       - uses: actions/upload-artifact@v3
         with:
-          name: pprod-build
+          name: preprod-build
           path: |
             .env
             dist/**
@@ -30,14 +31,19 @@ jobs:
   deploy:
     needs: prepare
     runs-on: ubuntu-latest
-    environment:
-      name: pre-production
-      reviewers: mrMarkGaruda
-
     steps:
       - uses: actions/download-artifact@v3
         with:
-          name: pprod-build
-      - run: |
-          scp -r .env dist/* ${{ secrets.PPROD_SSH_USER }}@${{ secrets.PPROD_SERVER }}:/var/app
-          ssh ${{ secrets.PPROD_SSH_USER }}@${{ secrets.PPROD_SERVER }} "pm2 restart all"
+          name: preprod-build
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ secrets.PPROD_SERVER }}
+          username: ${{ secrets.PPROD_SSH_USER }}
+          key: ${{ secrets.PPROD_SSH_KEY }}
+          source: ".env,dist/**"
+          target: "/var/app"
+          script: |
+            cd /var/app
+            npm ci
+            npx pm2 restart all

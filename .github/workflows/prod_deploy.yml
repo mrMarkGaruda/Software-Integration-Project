@@ -4,23 +4,13 @@ on:
   push:
     branches: [prod]
 
+permissions:
+  contents: read
+  id-token: write
+
 jobs:
-  bump-version:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v3
-      - run: npm ci
-      - id: version
-        uses: anothrNick/github-tag-action@v1.37.0
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          tag_prefix: "v"
-
   prepare:
-    needs: bump-version
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
@@ -29,9 +19,8 @@ jobs:
       - run: |
           npm ci
           npm run build
-          echo "NODE_ENV=production" >> .env
-          echo "DB_URL=${{ secrets.PROD_DB_URL }}" >> .env
-          echo "JWT_SECRET=${{ secrets.PROD_JWT_SECRET }}" >> .env
+      - run: |
+          printf "NODE_ENV=production\nDB_URL=%s\nJWT_SECRET=%s\n" "${{ secrets.PROD_DB_URL }}" "${{ secrets.PROD_JWT_SECRET }}" > .env
       - uses: actions/upload-artifact@v3
         with:
           name: prod-build
@@ -40,23 +29,31 @@ jobs:
             dist/**
 
   deploy:
-    needs: [bump-version, prepare]
+    needs: prepare
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/download-artifact@v3
         with:
           name: prod-build
-      - run: |
-          scp -r .env dist/* ${{ secrets.PROD_SSH_USER }}@${{ secrets.PROD_SERVER }}:/var/app
-          ssh ${{ secrets.PROD_SSH_USER }}@${{ secrets.PROD_SERVER }} "pm2 restart all"
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ secrets.PROD_SERVER }}
+          username: ${{ secrets.PROD_SSH_USER }}
+          key: ${{ secrets.PROD_SSH_KEY }}
+          source: ".env,dist/**"
+          target: "/var/app"
+          script: |
+            cd /var/app
+            npm ci
+            npx pm2 restart all
       - name: Notify Slack
         uses: slackapi/slack-github-action@v1.23.0
         with:
           payload: |
             {
               "channel": "#deployments",
-              "text": ":rocket: Deployed version ${{ steps.version.outputs.new_tag }} to production :white_check_mark:"
+              "text": ":rocket: Deployment to production complete"
             }
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
