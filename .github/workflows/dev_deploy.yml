@@ -1,0 +1,25 @@
+name: CI/CD - Development
+
+on:
+  push:
+    branches: [dev]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+      - run: |
+          npm ci
+          npm run build
+          echo "NODE_ENV=development" >> .env
+          echo "DB_URL=${{ secrets.DEV_DB_URL }}" >> .env
+          echo "JWT_SECRET=${{ secrets.DEV_JWT_SECRET }}" >> .env
+      - run: |
+          scp -r .env dist/* ${{ secrets.DEV_SSH_USER }}@${{ secrets.DEV_SERVER }}:/var/app
+          ssh ${{ secrets.DEV_SSH_USER }}@${{ secrets.DEV_SERVER }} "pm2 restart all"

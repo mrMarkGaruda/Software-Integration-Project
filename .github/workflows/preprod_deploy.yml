@@ -1,0 +1,40 @@
+name: CD - Pre-Production
+
+on:
+  push:
+    branches: [pprod]
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+      - run: |
+          npm ci
+          npm run build
+          echo "NODE_ENV=preproduction" >> .env
+          echo "DB_URL=${{ secrets.PPROD_DB_URL }}" >> .env
+          echo "JWT_SECRET=${{ secrets.PPROD_JWT_SECRET }}" >> .env
+      - uses: actions/upload-artifact@v3
+        with:
+          name: pprod-build
+          path: |
+            .env
+            dist/**
+
+  deploy:
+    needs: prepare
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          name: pprod-build
+      - run: |
+          scp -r .env dist/* ${{ secrets.PPROD_SSH_USER }}@${{ secrets.PPROD_SERVER }}:/var/app
+          ssh ${{ secrets.PPROD_SSH_USER }}@${{ secrets.PPROD_SERVER }} "pm2 restart all"

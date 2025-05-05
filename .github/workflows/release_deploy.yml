@@ -1,0 +1,40 @@
+name: CD - Release
+
+on:
+  push:
+    branches: [release]
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+      - run: |
+          npm ci
+          npm run build
+          echo "NODE_ENV=staging" >> .env
+          echo "DB_URL=${{ secrets.RELEASE_DB_URL }}" >> .env
+          echo "JWT_SECRET=${{ secrets.RELEASE_JWT_SECRET }}" >> .env
+      - uses: actions/upload-artifact@v3
+        with:
+          name: release-build
+          path: |
+            .env
+            dist/**
+
+  deploy:
+    needs: prepare
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          name: release-build
+      - run: |
+          scp -r .env dist/* ${{ secrets.RELEASE_SSH_USER }}@${{ secrets.RELEASE_SERVER }}:/var/app
+          ssh ${{ secrets.RELEASE_SSH_USER }}@${{ secrets.RELEASE_SERVER }} "pm2 restart all"

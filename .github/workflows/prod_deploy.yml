@@ -1,0 +1,53 @@
+name: CD - Production
+
+on:
+  push:
+    branches: [prod]
+
+jobs:
+  bump-version:
+    runs-on: ubuntu-latest
+
+  prepare:
+    needs: bump-version
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      - run: |
+          npm ci
+          npm run build
+          echo "NODE_ENV=production" >> .env
+          echo "DB_URL=${{ secrets.PROD_DB_URL }}" >> .env
+          echo "JWT_SECRET=${{ secrets.PROD_JWT_SECRET }}" >> .env
+      - uses: actions/upload-artifact@v3
+        with:
+          name: prod-build
+          path: |
+            .env
+            dist/**
+
+  deploy:
+    needs: [bump-version, prepare]
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          name: prod-build
+      - run: |
+          scp -r .env dist/* ${{ secrets.PROD_SSH_USER }}@${{ secrets.PROD_SERVER }}:/var/app
+          ssh ${{ secrets.PROD_SSH_USER }}@${{ secrets.PROD_SERVER }} "pm2 restart all"
+      - name: Notify Slack
+        uses: slackapi/slack-github-action@v1.23.0
+        with:
+          payload: |
+            {
+              "channel": "#deployments",
+              "text": ":rocket: Deployed version ${{ steps.version.outputs.new_tag }} to production :white_check_mark:"
+            }
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
