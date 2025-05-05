@@ -27,8 +27,6 @@ jobs:
           host: ${{ secrets.DEV_SERVER }}
           username: ${{ secrets.DEV_SSH_USER }}
           key: ${{ secrets.DEV_SSH_KEY }}
-          source: ".env,dist/**"
-          target: "/var/app"
           script: |
             cd /var/app
             npm ci

@@ -12,7 +12,7 @@ jobs:
         node: [18]
     steps:
       - uses: actions/checkout@v4.2.2
-      - uses: actions/setup-node@v4.4.0
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
           cache: 'npm'
@@ -27,27 +27,29 @@ jobs:
         node: [18]
     steps:
       - uses: actions/checkout@v4.2.2
-      - uses: actions/setup-node@v4.4.0
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
           cache: 'npm'
       - run: npm ci
       - run: npm run test -- --coverage
-      - uses: actions/upload-artifact@v3.1.4
+      - run: ls -al coverage
+      - uses: actions/upload-artifact@v4
         with:
           name: coverage-report
-          path: coverage
+          path: coverage/
 
   codecov:
     needs: test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v3.1.4
+      - uses: actions/download-artifact@v3
         with:
           name: coverage-report
-      - uses: codecov/codecov-action@v5.4.2
+      - uses: codecov/codecov-action@v4
+        # token: ${{ secrets.CODECOV_TOKEN }}
         with:
-          files: coverage/*.xml
+          files: ./**/*.xml
 
   build:
     needs: test
@@ -57,7 +59,7 @@ jobs:
         node: [18]
     steps:
       - uses: actions/checkout@v4.2.2
-      - uses: actions/setup-node@v4.4.0
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
           cache: 'npm'
