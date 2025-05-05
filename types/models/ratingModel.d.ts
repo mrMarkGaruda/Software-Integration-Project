@@ -1,4 +1,4 @@
-import mongoose, { Document, Model } from 'mongoose';
+import { Document, Model } from 'mongoose';
 
 export interface IRating extends Document {
   movie_id: number;
