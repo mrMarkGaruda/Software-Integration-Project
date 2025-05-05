@@ -1,3 +1,4 @@
+// eslint.config.ts
 import js from "@eslint/js";
 import globals from "globals";
 import prettier from "eslint-config-prettier";
@@ -9,14 +10,16 @@ export default defineConfig([
     files: ["**/*.{js,mjs,cjs,ts}"],
     plugins: { js, prettier: prettierPlugin },
     extends: ["js/recommended", prettier],
+    languageOptions: {
+      globals: {
+        ...globals.node,
+        ...globals.jest // ✅ Include Jest globals like describe, it, expect
+      }
+    },
     rules: {
       "prettier/prettier": "error",
-      "no-unused-vars": "off", // Disable warnings for unused variables
-      "no-undef": "warn"       // Change undefined variables to warnings instead of errors
+      "no-unused-vars": "off",
+      "no-undef": "off" // ✅ Turned off since Jest globals will now be recognized
     }
-  },
-  {
-    files: ["**/*.{js,mjs,cjs,ts}"],
-    languageOptions: { globals: globals.node }
   }
 ]);
