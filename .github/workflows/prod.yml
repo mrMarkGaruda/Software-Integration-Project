@@ -1,0 +1,31 @@
+name: CD - Production
+
+on:
+  push:
+    branches:
+      - prod
+
+jobs:
+  build-test-deploy:
+    runs-on: ubuntu-latest
+    env:
+      NODE_ENV: production
+      DB_URL: ${{ secrets.PROD_DB_URL }}
+      JWT_SECRET: ${{ secrets.PROD_JWT_SECRET }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      - run: |
+          npm ci
+          npm run lint
+          npm run test
+      - run: |
+          echo "DB_URL=${{ secrets.PROD_DB_URL }}" >> .env
+          echo "JWT_SECRET=${{ secrets.PROD_JWT_SECRET }}" >> .env
+      - run: npm run build
+      - name: Deploy to Production Server
+        run: |
+          # Replace with your actual deployment commands
+          ssh ubuntu@prod.server "cd /app && git pull && pm2 restart all"

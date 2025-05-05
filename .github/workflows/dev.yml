@@ -1,0 +1,44 @@
+name: CI - Development
+
+on:
+  push:
+    branches:
+      - dev
+  pull_request:
+    branches:
+      - dev
+
+jobs:
+  build-test-deploy:
+    runs-on: ubuntu-latest
+    env:
+      NODE_ENV: development
+      DB_URL: ${{ secrets.DEV_DB_URL }}
+      JWT_SECRET: ${{ secrets.DEV_JWT_SECRET }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies & lint/test
+        run: |
+          npm ci
+          npm run lint
+          npm run test
+
+      - name: Generate .env file
+        run: |
+          echo "DB_URL=${{ secrets.DEV_DB_URL }}" >> .env
+          echo "JWT_SECRET=${{ secrets.DEV_JWT_SECRET }}" >> .env
+
+      - name: Build
+        run: npm run build
+
+      - name: Deploy to Dev Server
+        run: |
+          # Replace with your actual deployment commands
+          ssh ubuntu@dev.server "cd /app && git pull && pm2 restart all"
