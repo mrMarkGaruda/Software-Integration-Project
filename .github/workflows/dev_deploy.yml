@@ -5,21 +5,27 @@ on:
     branches: [dev]
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
         with:
           node-version: '18'
           cache: 'npm'
-      - run: |
+      - name: Install & build
+        run: |
           npm ci
           npm run build
+      - name: Create .env
+        run: |
           echo "NODE_ENV=development" >> .env
           echo "DB_URL=${{ secrets.DEV_DB_URL }}" >> .env
           echo "JWT_SECRET=${{ secrets.DEV_JWT_SECRET }}" >> .env
-      - run: |
+      - name: Deploy to Dev Server
+        run: |
           scp -r .env dist/* ${{ secrets.DEV_SSH_USER }}@${{ secrets.DEV_SERVER }}:/var/app
           ssh ${{ secrets.DEV_SSH_USER }}@${{ secrets.DEV_SERVER }} "pm2 restart all"

@@ -30,6 +30,9 @@ jobs:
   deploy:
     needs: prepare
     runs-on: ubuntu-latest
+    environment:
+      name: pre-production
+      reviewers: mrMarkGaruda
 
     steps:
       - uses: actions/download-artifact@v3

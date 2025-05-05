@@ -30,6 +30,9 @@ jobs:
   deploy:
     needs: prepare
     runs-on: ubuntu-latest
+    environment:
+      name: staging
+      url: https://staging.example.com
 
     steps:
       - uses: actions/download-artifact@v3
