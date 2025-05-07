@@ -10,26 +10,24 @@ interface JwtPayload {
   };
 }
 
-const verifyToken = (req: Request, res: Response, next: NextFunction): Response | void => {
-  const token = req.header('Authorization');
+const verifyToken = (req: Request, res: Response, next: NextFunction): void => {
+  const header = req.header('Authorization');
 
-  if (!token) {
-    return res.status(unauthorized).json({ error: 'Unauthorized' });
+  if (!header) {
+    res.status(unauthorized).json({ error: 'Unauthorized' });
+    return;
   }
 
+  const token = header.split(' ')[1];
+
   try {
-    const decoded = jwt.verify(
-      token.split(' ')[1],
-      process.env.JWT_SECRET_KEY!
-    ) as JwtPayload;
-
+    const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY!) as JwtPayload;
     req.user = decoded.user;
-    console.log('TOKEN USER: ', req.user);
-
     next();
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error(error);
-    return res.status(unauthorized).json({ error: 'Invalid token' });
+    res.status(unauthorized).json({ error: 'Invalid token' });
+    return;
   }
 };
 

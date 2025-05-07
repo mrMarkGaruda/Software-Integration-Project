@@ -35,7 +35,7 @@ function startConnection(): void {
 
   db_connection = new pg.Pool(db_config);
 
-  db_connection.connect((err: Error | null, client: pg.PoolClient) => {
+  db_connection.connect((err: Error | null, _client: pg.PoolClient) => {
     if (!err) {
       logger.info('PostgreSQL Connected');
     } else {
@@ -43,7 +43,7 @@ function startConnection(): void {
     }
   });
 
-  db_connection.on('error', (err: Error, client: pg.PoolClient) => {
+  db_connection.on('error', (err: Error, _client: pg.PoolClient) => {
     logger.error('Unexpected error on idle client');
     startConnection();
   });
