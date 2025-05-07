@@ -49,6 +49,7 @@
     "@types/jest": "^29.5.14",
     "@types/jsonwebtoken": "^9.0.9",
     "@types/mongoose": "^5.11.96",
+    "@types/morgan": "^1.9.9",
     "@types/node": "^22.15.3",
     "@types/pg": "^8.11.14",
     "@types/winston": "^2.4.4",
