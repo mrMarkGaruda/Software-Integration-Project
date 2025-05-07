@@ -14,10 +14,10 @@ interface DbConfig {
 }
 
 const db_config: DbConfig = {
-  user: process.env.DB_USER,
-  host: process.env.DB_HOST,
-  database: process.env.DB_NAME,
-  password: process.env.DB_PASSWORD,
+  user: process.env.DB_USER!,
+  host: process.env.DB_HOST!,
+  database: process.env.DB_NAME!,
+  password: process.env.DB_PASSWORD!,
   port: 5432,
   max: 10,
 };
@@ -35,7 +35,7 @@ function startConnection(): void {
 
   db_connection = new pg.Pool(db_config);
 
-  db_connection.connect((err: Error | null, client: pg.PoolClient) => {
+  db_connection.connect((err: Error | null) => {
     if (!err) {
       logger.info('PostgreSQL Connected');
     } else {
@@ -43,7 +43,7 @@ function startConnection(): void {
     }
   });
 
-  db_connection.on('error', (err: Error, client: pg.PoolClient) => {
+  db_connection.on('error', () => {
     logger.error('Unexpected error on idle client');
     startConnection();
   });
