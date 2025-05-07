@@ -1,4 +1,4 @@
-import express, { Application, Request, Response, NextFunction, RequestHandler } from 'express';
+import express, { Application } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import mongoose from 'mongoose';
@@ -37,7 +37,7 @@ const registerCoreMiddleWare = (): void => {
   );
 
   // Morgan logging (cast to RequestHandler to satisfy types)
-  app.use(morgan('combined') as unknown as RequestHandler);
+  app.use(morgan('combined') as unknown as express.RequestHandler);
 
   // Built‑in middleware
   app.use(express.json());
@@ -45,8 +45,8 @@ const registerCoreMiddleWare = (): void => {
   app.use(helmet());
 
   // Custom middleware (all must return void)
-  app.use(validator as RequestHandler);
-  app.use(healthCheck as RequestHandler);
+  app.use(validator as express.RequestHandler);
+  app.use(healthCheck as express.RequestHandler);
 
   // Public routes
   app.use('/auth', authRoutes);
@@ -60,7 +60,7 @@ const registerCoreMiddleWare = (): void => {
   app.use('/comments', verifyToken, commentsRoutes);
 
   // 404 fallback
-  app.use(notFound as RequestHandler);
+  app.use(notFound as express.RequestHandler);
 
   logger.http('Done registering all middlewares');
 };
