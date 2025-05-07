@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { statusCodes } from '../constants/statusCodes';
+import statusCodes from '../constants/statusCodes';
 import logger from '../middleware/winston';
 import pool from '../boot/database/db_connect';
 import jwt from 'jsonwebtoken';
@@ -25,7 +25,8 @@ interface LoginBody {
  * @param res Express response
  */
 const register = async (req: Request, res: Response): Promise<void> => {
-  const { email, username, password, country, city, street } = req.body as RegisterBody;
+  const { email, username, password, country, city, street } =
+    req.body as RegisterBody;
 
   if (!email || !username || !password || !country) {
     res.status(statusCodes.badRequest).json({ message: 'Missing parameters' });
@@ -127,7 +128,4 @@ const login = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-export {
-  register,
-  login,
-};
+export { register, login };
