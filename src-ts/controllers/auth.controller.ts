@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import userModel from '../models/userModel';
+import logger from '../middleware/winston';
 
 export const signup = async (req: Request, res: Response): Promise<void> => {
   const { username, email, password } = req.body;
@@ -56,8 +57,11 @@ export const signin = async (req: Request, res: Response): Promise<void> => {
     );
 
     res.status(200).json({ token });
-  } catch (error: any) {
-    console.error('Error while getting user from DB', error.message);
+  } catch (error: unknown) {
+    logger.error(
+      'Error while getting user from DB',
+      error instanceof Error ? error.message : String(error)
+    );
     res.status(500).json({ error: 'Failed to get user' });
   }
 };
@@ -79,8 +83,11 @@ export const getUser = async (req: Request, res: Response): Promise<void> => {
     }
 
     res.status(200).json(user);
-  } catch (error: any) {
-    console.error('Error while getting user from DB', error.message);
+  } catch (error: unknown) {
+    logger.error(
+      'Error while getting user from DB',
+      error instanceof Error ? error.message : String(error)
+    );
     res.status(500).json({ error: 'Failed to get user' });
   }
 };

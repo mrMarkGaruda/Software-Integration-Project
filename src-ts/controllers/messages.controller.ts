@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import MessageModel from '../models/messageModel';
+import logger from '../middleware/winston';
 
 export const getMessages = async (
   _req: Request,
@@ -17,8 +18,11 @@ export const getMessageById = async (
   try {
     const message = await MessageModel.findById(messageId);
     res.status(200).json(message);
-  } catch (error: any) {
-    console.log('Error while getting message from DB', error.message);
+  } catch (error: unknown) {
+    logger.error(
+      'Error while getting message from DB',
+      error instanceof Error ? error.message : String(error)
+    );
     res.status(500).json({ error: 'Error while getting message' });
   }
 };
@@ -45,8 +49,11 @@ export const addMessage = async (
     const messageObj = new MessageModel(message);
     await messageObj.save();
     res.status(200).json(messageObj);
-  } catch (error: any) {
-    console.log('Error while adding message to DB', error.message);
+  } catch (error: unknown) {
+    logger.error(
+      'Error while adding message to DB',
+      error instanceof Error ? error.message : String(error)
+    );
     res.status(500).json({ error: 'Failed to add message' });
   }
 };
@@ -69,8 +76,11 @@ export const editMessage = async (
       { new: true }
     );
     res.status(200).json(message);
-  } catch (error: any) {
-    console.log('Error while updating message', error.message);
+  } catch (error: unknown) {
+    logger.error(
+      'Error while updating message',
+      error instanceof Error ? error.message : String(error)
+    );
     res.status(500).json({ error: 'Failed to update message' });
   }
 };
@@ -89,8 +99,11 @@ export const deleteMessage = async (
   try {
     await MessageModel.findByIdAndDelete(messageId);
     res.status(200).json({ message: 'Message deleted' });
-  } catch (error: any) {
-    console.log('Error while deleting message', error.message);
+  } catch (error: unknown) {
+    logger.error(
+      'Error while deleting message',
+      error instanceof Error ? error.message : String(error)
+    );
     res.status(500).json({ error: 'Failed to delete message' });
   }
 };

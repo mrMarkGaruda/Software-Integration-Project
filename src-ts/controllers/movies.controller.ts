@@ -41,8 +41,8 @@ export const getMovies = async (req: Request, res: Response): Promise<void> => {
         {}
       );
       res.status(statusCodes.success).json({ movies: groupedMovies });
-    } catch (error: any) {
-      logger.error(error.stack);
+    } catch (error: unknown) {
+      logger.error(error instanceof Error ? error.stack : String(error));
       res
         .status(statusCodes.queryError)
         .json({ error: 'Exception occured while fetching movies' });
@@ -57,8 +57,8 @@ const getMoviesByCategory = async (category: string): Promise<Movie[]> => {
       [category]
     );
     return movies.rows;
-  } catch (error: any) {
-    logger.error(error.stack);
+  } catch (error: unknown) {
+    logger.error(error instanceof Error ? error.stack : String(error));
     return [];
   }
 };
@@ -72,8 +72,8 @@ export const getTopRatedMovies = async (
       'SELECT * FROM movies ORDER BY rating DESC LIMIT 10;'
     );
     res.status(statusCodes.success).json({ movies: movies.rows });
-  } catch (error: any) {
-    logger.error(error.stack);
+  } catch (error: unknown) {
+    logger.error(error instanceof Error ? error.stack : String(error));
     res
       .status(statusCodes.queryError)
       .json({ error: 'Exception occured while fetching top rated movies' });
@@ -90,8 +90,8 @@ export const getSeenMovies = async (
       [req.user.email]
     );
     res.status(statusCodes.success).json({ movies: movies.rows });
-  } catch (error: any) {
-    logger.error(error.stack);
+  } catch (error: unknown) {
+    logger.error(error instanceof Error ? error.stack : String(error));
     res
       .status(statusCodes.queryError)
       .json({ error: 'Exception occured while fetching seen movies' });

@@ -9,6 +9,10 @@ interface AuthenticatedRequest extends Request {
   };
 }
 
+interface QueryResult {
+  rows: Array<Record<string, unknown>>;
+}
+
 export const editPassword = async (
   req: AuthenticatedRequest,
   res: Response
@@ -30,7 +34,7 @@ export const editPassword = async (
   pool.query(
     'SELECT * FROM users WHERE email = $1 AND password = crypt($2, password);',
     [req.user.email, oldPassword],
-    (err: Error, result: any) => {
+    (err: Error | null, result: QueryResult) => {
       if (err) {
         logger.error(err.stack);
         res
@@ -43,7 +47,7 @@ export const editPassword = async (
         pool.query(
           "UPDATE users SET password = crypt($1, gen_salt('bf')) WHERE email = $2;",
           [newPassword, req.user.email],
-          (err: Error) => {
+          (err: Error | null) => {
             if (err) {
               logger.error(err.stack);
               res

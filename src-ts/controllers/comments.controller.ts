@@ -35,8 +35,8 @@ export const addComment = async (
 
     await commentObj.save();
     res.status(statusCodes.success).json({ message: 'Comment added' });
-  } catch (error: any) {
-    logger.error(error.stack);
+  } catch (error: unknown) {
+    logger.error(error instanceof Error ? error.stack : String(error));
     res
       .status(statusCodes.queryError)
       .json({ error: 'Exception occurred while adding comment' });
@@ -58,8 +58,8 @@ export const getCommentsById = async (
   try {
     const comments = await CommentModel.find({ movie_id: movieId });
     res.status(statusCodes.success).json({ comments });
-  } catch (error: any) {
-    logger.error(error.stack);
+  } catch (error: unknown) {
+    logger.error(error instanceof Error ? error.stack : String(error));
     res
       .status(statusCodes.queryError)
       .json({ error: 'Exception occured while fetching comments' });
