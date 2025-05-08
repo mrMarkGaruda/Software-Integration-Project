@@ -14,10 +14,10 @@ interface DbConfig {
 }
 
 const db_config: DbConfig = {
-  user: process.env.DB_USER,
-  host: process.env.DB_HOST,
-  database: process.env.DB_NAME,
-  password: process.env.DB_PASSWORD,
+  user: process.env.DB_USER!,
+  host: process.env.DB_HOST!,
+  database: process.env.DB_NAME!,
+  password: process.env.DB_PASSWORD!,
   port: 5432,
   max: 10,
 };
@@ -29,13 +29,11 @@ let db_connection: pg.Pool;
  */
 function startConnection(): void {
   // type parsers here
-  pg.types.setTypeParser(1082, function (stringValue: string): string {
-    return stringValue; // 1082 is for date type
-  });
+  pg.types.setTypeParser(1082, (stringValue: string): string => stringValue);
 
   db_connection = new pg.Pool(db_config);
 
-  db_connection.connect((err: Error | null, client: pg.PoolClient) => {
+  db_connection.connect((err: Error | null) => {
     if (!err) {
       logger.info('PostgreSQL Connected');
     } else {
@@ -43,8 +41,9 @@ function startConnection(): void {
     }
   });
 
-  db_connection.on('error', (err: Error, client: pg.PoolClient) => {
+  db_connection.on('error', (err: Error) => {
     logger.error('Unexpected error on idle client');
+    logger.error(err.message);
     startConnection();
   });
 }

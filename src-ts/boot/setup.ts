@@ -23,59 +23,54 @@ const PORT: number = Number(process.env.PORT) || 8080;
 const app: Application = express();
 
 /**
- * Register core middleware components
+ * Register core middleware components for the Express application
  */
 const registerCoreMiddleWare = (): void => {
-  try {
-    // using our session
-    app.use(
-      session({
-        secret: '1234',
-        resave: false,
-        saveUninitialized: true,
-        cookie: {
-          secure: false,
-          httpOnly: true,
-        },
-      })
-    );
+  // Session middleware
+  app.use(
+    session({
+      secret: '1234',
+      resave: false,
+      saveUninitialized: true,
+      cookie: { secure: false, httpOnly: true },
+    })
+  );
 
-    app.use(morgan('combined', { stream: logger.stream }));
-    app.use(express.json()); // returning middleware that only parses Json
-    app.use(cors({})); // enabling CORS
-    app.use(helmet()); // enabling helmet -> setting response headers
+  // Morgan logging (cast to RequestHandler to satisfy types)
+  app.use(morgan('combined') as unknown as express.RequestHandler);
 
-    app.use(validator);
-    app.use(healthCheck);
+  // Built‑in middleware
+  app.use(express.json());
+  app.use(cors());
+  app.use(helmet());
 
-    app.use('/auth', authRoutes);
-    app.use('/users', usersRoutes);
+  // Custom middleware (all must return void)
+  app.use(validator as express.RequestHandler);
+  app.use(healthCheck as express.RequestHandler);
 
-    // Route registration
-    app.use('/messages', verifyToken, messageRoutes);
-    app.use('/profile', verifyToken, profileRoutes);
-    app.use('/movies', verifyToken, moviesRoutes);
-    app.use('/ratings', verifyToken, ratingRoutes);
-    app.use('/comments', verifyToken, commentsRoutes);
+  // Public routes
+  app.use('/auth', authRoutes);
+  app.use('/users', usersRoutes);
 
-    // 404 handling for not found
-    app.use(notFound);
+  // Protected routes
+  app.use('/messages', verifyToken, messageRoutes);
+  app.use('/profile', verifyToken, profileRoutes);
+  app.use('/movies', verifyToken, moviesRoutes);
+  app.use('/ratings', verifyToken, ratingRoutes);
+  app.use('/comments', verifyToken, commentsRoutes);
 
-    logger.http('Done registering all middlewares');
-  } catch (err) {
-    logger.error('Error thrown while executing registerCoreMiddleWare');
-    process.exit(1);
-  }
+  // 404 fallback
+  app.use(notFound as express.RequestHandler);
+
+  logger.http('Done registering all middlewares');
 };
 
 /**
- * Handle uncaught exceptions 
+ * Handle uncaught exceptions
  */
 const handleError = (): void => {
-  // 'process' is a built it object in nodejs
-  // if uncaught exception, then we execute this
   process.on('uncaughtException', (err: Error) => {
-    logger.error(`UNCAUGHT_EXCEPTION OCCURED : ${JSON.stringify(err.stack)}`);
+    logger.error(`UNCAUGHT_EXCEPTION OCCURRED: ${err.stack}`);
   });
 };
 
@@ -83,35 +78,20 @@ const handleError = (): void => {
  * Connect to MongoDB and start the application
  */
 const startApp = (): void => {
-  try {
-    // Connect to MongoDB
-    mongoose.connect('mongodb://localhost:27017/epita')
-      .then(() => {
-        logger.info('MongoDB Connected');
-        
-        // register core application level middleware
-        registerCoreMiddleWare();
-
-        app.listen(PORT, () => {
-          logger.info('Listening on 127.0.0.1:' + PORT);
-        });
-
-        // exit on uncaught exception
-        handleError();
-      })
-      .catch((error) => {
-        logger.error('Error connecting to DB' + error);
+  mongoose
+    .connect('mongodb://localhost:27017/epita')
+    .then(() => {
+      logger.info('MongoDB Connected');
+      registerCoreMiddleWare();
+      app.listen(PORT, () => {
+        logger.info(`Listening on 127.0.0.1:${PORT}`);
       });
-  } catch (err) {
-    logger.error(
-      `startup :: Error while booting the application ${JSON.stringify(
-        err,
-        undefined,
-        2
-      )}`
-    );
-    throw err;
-  }
+      handleError();
+    })
+    .catch((error: Error) => {
+      logger.error('Error connecting to MongoDB: ' + error.message);
+      process.exit(1);
+    });
 };
 
 export { startApp };

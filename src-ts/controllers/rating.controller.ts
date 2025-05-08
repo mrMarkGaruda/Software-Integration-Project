@@ -11,7 +11,10 @@ interface AuthenticatedRequest extends Request {
   };
 }
 
-export const addRating = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+export const addRating = async (
+  req: AuthenticatedRequest,
+  res: Response
+): Promise<void> => {
   const { movieId } = req.params;
   const { rating } = req.body;
 
@@ -35,7 +38,8 @@ export const addRating = async (req: AuthenticatedRequest, res: Response): Promi
     const ratings = await RatingModel.find({ movie_id });
 
     const averageRating =
-      ratings.reduce((acc, item) => acc + item.rating, 0) / (ratings.length || 1);
+      ratings.reduce((acc, item) => acc + item.rating, 0) /
+      (ratings.length || 1);
 
     await pool.query('UPDATE movies SET rating = $1 WHERE movie_id = $2;', [
       averageRating,
@@ -43,8 +47,8 @@ export const addRating = async (req: AuthenticatedRequest, res: Response): Promi
     ]);
 
     res.status(statusCodes.success).json({ message: 'Rating added' });
-  } catch (error: any) {
-    logger.error(error.stack);
+  } catch (error: unknown) {
+    logger.error(error instanceof Error ? error.stack : String(error));
     res
       .status(statusCodes.queryError)
       .json({ error: 'Exception occurred while adding rating' });

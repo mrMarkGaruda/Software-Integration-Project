@@ -50,7 +50,10 @@ const loggerStream: LoggerStream = {
   },
 };
 
-// Attach the stream to the logger
-(logger as any).stream = loggerStream;
+// Create a custom logger object with the stream property
+const customLogger = {
+  ...logger,
+  stream: loggerStream,
+};
 
-export default logger;
+export default customLogger;

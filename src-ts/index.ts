@@ -2,16 +2,17 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import { startApp } from './boot/setup';
+import logger from './middleware/winston';
 
-(async () => {
+(async function runApp(): Promise<void> {
   try {
     await startApp();
   } catch (error: unknown) {
-    console.error('Error in index.ts => startApp');
+    logger.error('Error in index.ts => startApp');
     if (error instanceof Error) {
-      console.error(`Error: ${error.message}`);
+      logger.error(`Error: ${error.message}`);
     } else {
-      console.error(`Error: ${JSON.stringify(error, null, 2)}`);
+      logger.error(`Error: ${JSON.stringify(error, null, 2)}`);
     }
   }
 })();
