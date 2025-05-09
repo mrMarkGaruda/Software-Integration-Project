@@ -3,9 +3,16 @@ FROM node:16-alpine AS builder
 # Set working directory
 WORKDIR /app
 
+# Install git (required for husky)
+RUN apk add --no-cache git
+
 # Copy package files and install dependencies
 COPY package*.json ./
-RUN npm ci
+
+# Skip husky install during npm ci
+ENV HUSKY_SKIP_INSTALL=1
+ENV HUSKY=0
+RUN npm ci --no-audit --no-fund
 
 # Copy the rest of the application
 COPY . .
@@ -22,12 +29,14 @@ WORKDIR /app
 # Set node environment
 ARG NODE_ENV=production
 ENV NODE_ENV=${NODE_ENV}
+ENV HUSKY_SKIP_INSTALL=1
+ENV HUSKY=0
 
 # Copy package files
 COPY package*.json ./
 
 # Install production dependencies only
-RUN npm ci --only=production
+RUN npm ci --only=production --no-audit --no-fund
 
 # Copy built application from builder stage
 COPY --from=builder /app/dist ./dist

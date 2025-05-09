@@ -5,7 +5,7 @@ services:
     container_name: movie-app-dev
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: docker/Dockerfile  # Updated path to Dockerfile
       args:
         - NODE_ENV=development
     volumes:
@@ -45,7 +45,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./init-scripts:/docker-entrypoint-initdb.d
+      - ./docker/init-scripts:/docker-entrypoint-initdb.d  # Updated path to init scripts
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
