@@ -14,7 +14,7 @@
     "lint": "eslint \"src-ts/**/*.{js,ts}\"",
     "lint:fix": "eslint \"src-ts/**/*.{js,ts}\" --fix",
     "format": "prettier --write \"src-ts/**/*.{js,ts}\"",
-    "prepare": "husky install",
+    "prepare": "node -e \"if (process.env.NODE_ENV !== 'production') require('child_process').execSync('husky install', { stdio: 'inherit' })\"",
     "test": "jest",
     "test:coverage": "jest --coverage"
   },

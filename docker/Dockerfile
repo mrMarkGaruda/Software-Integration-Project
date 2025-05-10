@@ -1,51 +1,48 @@
-FROM node:16-alpine AS builder
-
-# Set working directory
+# Stage: install dependencies based on build args
+ARG NODE_ENV=production
+FROM node:16-alpine AS deps
 WORKDIR /app
 
-# Install git (required for husky)
+# Install Git for Husky
 RUN apk add --no-cache git
 
-# Copy package files and install dependencies
+# Copy package manifests
 COPY package*.json ./
 
-# Skip husky install during npm ci
-ENV HUSKY_SKIP_INSTALL=1
-ENV HUSKY=0
-RUN npm ci --no-audit --no-fund
+# Conditional install
+RUN if [ "$NODE_ENV" = "development" ]; then \
+      npm ci --no-audit --no-fund; \
+    else \
+      HUSKY_SKIP_INSTALL=1 HUSKY=0 npm ci --only=production --no-audit --no-fund; \
+    fi
 
-# Copy the rest of the application
+# Stage: builder
+FROM node:16-alpine AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-
-# Build the application
 RUN npm run build
 
-# Production image
-FROM node:16-alpine
-
-# Set working directory
+# Stage: development
+FROM node:16-alpine AS dev
 WORKDIR /app
+ARG NODE_ENV=development
+ENV NODE_ENV=${NODE_ENV}
+# copy modules and source
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+EXPOSE 8080
+CMD ["npm", "run", "dev"]
 
-# Set node environment
+# Stage: production
+FROM node:16-alpine AS prod
+WORKDIR /app
 ARG NODE_ENV=production
 ENV NODE_ENV=${NODE_ENV}
 ENV HUSKY_SKIP_INSTALL=1
 ENV HUSKY=0
-
-# Copy package files
-COPY package*.json ./
-
-# Install production dependencies only
-RUN npm ci --only=production --no-audit --no-fund
-
-# Copy built application from builder stage
+COPY --from=deps /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
-
-# Copy additional files
 COPY .env* ./
-
-# Expose port
 EXPOSE 8080
-
-# Start the application
 CMD ["node", "dist/src-ts/index.js"]

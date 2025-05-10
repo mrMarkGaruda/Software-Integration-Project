@@ -1,23 +1,22 @@
 version: '3.8'
-
 services:
   app:
     container_name: movie-app-dev
     build:
       context: .
-      dockerfile: docker/Dockerfile  # Updated path to Dockerfile
+      dockerfile: docker/Dockerfile
+      target: dev
       args:
-        - NODE_ENV=development
+        NODE_ENV: development
     volumes:
-      - ./:/app
+      - ./:/app:delegated
       - /app/node_modules
     ports:
       - "8080:8080"
     environment:
-      - NODE_ENV=development
+      NODE_ENV: development
     env_file:
       - .env.development
-    command: npm run dev
     depends_on:
       - mongodb
       - postgres
@@ -33,7 +32,7 @@ services:
     volumes:
       - mongodb_data:/data/db
     environment:
-      - MONGO_INITDB_DATABASE=epita
+      MONGO_INITDB_DATABASE: epita
     networks:
       - app-network
     restart: unless-stopped
@@ -45,11 +44,11 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./docker/init-scripts:/docker-entrypoint-initdb.d  # Updated path to init scripts
+      - ./docker/init-scripts:/docker-entrypoint-initdb.d
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=movies
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: movies
     networks:
       - app-network
     restart: unless-stopped
@@ -60,19 +59,17 @@ services:
     ports:
       - "5050:80"
     environment:
-      - PGADMIN_DEFAULT_EMAIL=admin@admin.com
-      - PGADMIN_DEFAULT_PASSWORD=admin
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
     volumes:
       - pgadmin_data:/var/lib/pgadmin
     networks:
       - app-network
     restart: unless-stopped
-
 volumes:
   mongodb_data:
   postgres_data:
   pgadmin_data:
-
 networks:
   app-network:
     driver: bridge
