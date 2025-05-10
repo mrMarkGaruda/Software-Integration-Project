@@ -5,18 +5,20 @@ services:
     container_name: movie-app-pprod
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: docker/Dockerfile
+      target: prod
       args:
-        - NODE_ENV=production
+        NODE_ENV: production
     ports:
       - "8080:8080"
     environment:
-      - NODE_ENV=production
+      NODE_ENV: production
     env_file:
       - .env.pprod
     depends_on:
       - mongodb
       - postgres
+      - redis
     networks:
       - app-network
     restart: unless-stopped
@@ -37,9 +39,9 @@ services:
     volumes:
       - mongodb_data:/data/db
     environment:
-      - MONGO_INITDB_DATABASE=epita
-      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USERNAME}
-      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
+      MONGO_INITDB_DATABASE: epita
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME:-mongo_user}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-pprod_mongo_pwd}
     networks:
       - app-network
     restart: unless-stopped
@@ -54,11 +56,11 @@ services:
     container_name: postgres-pprod
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./init-scripts:/docker-entrypoint-initdb.d
+      - ./docker/init-scripts:/docker-entrypoint-initdb.d
     environment:
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-pprod_pg_pwd}
+      POSTGRES_DB: ${POSTGRES_DB:-movies}
     networks:
       - app-network
     restart: unless-stopped
@@ -72,7 +74,7 @@ services:
   redis:
     image: redis:alpine
     container_name: redis-pprod
-    command: redis-server --requirepass ${REDIS_PASSWORD}
+    command: redis-server --requirepass ${REDIS_PASSWORD:-pprod_redis_pwd}
     volumes:
       - redis_data:/data
     networks:

@@ -5,13 +5,14 @@ services:
     container_name: movie-app-release
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: docker/Dockerfile
+      target: prod
       args:
-        - NODE_ENV=production
+        NODE_ENV: production
     ports:
       - "8080:8080"
     environment:
-      - NODE_ENV=production
+      NODE_ENV: production
     env_file:
       - .env.release
     depends_on:
@@ -34,7 +35,7 @@ services:
     volumes:
       - mongodb_data:/data/db
     environment:
-      - MONGO_INITDB_DATABASE=epita
+      MONGO_INITDB_DATABASE: epita
     networks:
       - app-network
     restart: unless-stopped
@@ -51,11 +52,11 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./init-scripts:/docker-entrypoint-initdb.d
+      - ./docker/init-scripts:/docker-entrypoint-initdb.d
     environment:
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=${POSTGRES_DB}
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres_release_pwd}
+      POSTGRES_DB: ${DB_NAME:-movies}
     networks:
       - app-network
     restart: unless-stopped

@@ -63,18 +63,22 @@ fi
 # Check if the environment file exists
 if [ ! -f "$ENV_FILE" ]; then
   print_message "$YELLOW" "Warning: Environment file not found: $ENV_FILE"
+  
+  # Create a minimal environment file if it doesn't exist
+  if [[ "$OPERATION" == *"up"* ]]; then
+    print_message "$YELLOW" "Creating a minimal $ENV_FILE file..."
+    touch "$ENV_FILE"
+  fi
 fi
+
+# Make sure script is executable
+chmod +x docker-run.sh
 
 # Execute docker-compose command
 print_message "$GREEN" "Running docker-compose -f $COMPOSE_FILE $OPERATION with $ENV environment..."
 
-# Set environment variables from the environment file
-if [ -f "$ENV_FILE" ]; then
-  export $(grep -v '^#' $ENV_FILE | xargs)
-fi
-
-# Run the docker-compose command
-docker-compose -f $COMPOSE_FILE $OPERATION
+# Run the docker-compose command with the environment file
+docker compose -f $COMPOSE_FILE --env-file $ENV_FILE $OPERATION
 
 # Check the exit status
 if [ $? -eq 0 ]; then

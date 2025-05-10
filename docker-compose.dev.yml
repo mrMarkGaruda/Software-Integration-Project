@@ -66,10 +66,12 @@ services:
     networks:
       - app-network
     restart: unless-stopped
+    
 volumes:
   mongodb_data:
   postgres_data:
   pgadmin_data:
+  
 networks:
   app-network:
     driver: bridge

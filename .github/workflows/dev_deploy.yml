@@ -20,7 +20,15 @@ jobs:
           npm ci
           npm run build
       - run: |
-          printf "NODE_ENV=development\nDB_URL=%s\nJWT_SECRET=%s\n" "${{ secrets.DEV_DB_URL }}" "${{ secrets.DEV_JWT_SECRET }}" > .env
+          # Create a proper .env file based on the development template
+          cp .env.development .env
+          # Override with secrets if provided
+          if [ ! -z "${{ secrets.DEV_DB_URL }}" ]; then
+            echo "DB_URL=${{ secrets.DEV_DB_URL }}" >> .env
+          fi
+          if [ ! -z "${{ secrets.DEV_JWT_SECRET }}" ]; then
+            echo "JWT_SECRET_KEY=${{ secrets.DEV_JWT_SECRET }}" >> .env
+          fi
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v0.1.6
         with:
@@ -29,5 +37,7 @@ jobs:
           key: ${{ secrets.DEV_SSH_KEY }}
           script: |
             cd /var/app
-            npm ci
+            # Make sure we have node_modules
+            npm ci --only=production
+            # Restart the service
             npx pm2 restart all

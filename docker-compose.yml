@@ -6,6 +6,7 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile
+      target: dev
     ports:
       - "8080:8080"
     depends_on:
@@ -14,9 +15,13 @@ services:
     environment:
       - NODE_ENV=development
     env_file:
-      - .env
+      - .env.development
+    volumes:
+      - ./:/app:delegated
+      - /app/node_modules
     networks:
       - app-network
+    restart: unless-stopped
 
   mongodb:
     image: mongo:latest
@@ -25,23 +30,27 @@ services:
       - "27017:27017"
     volumes:
       - mongodb_data:/data/db
+    environment:
+      MONGO_INITDB_DATABASE: epita
     networks:
       - app-network
+    restart: unless-stopped
 
   postgres:
-    image: postgres:latest
+    image: postgres:13-alpine
     container_name: postgres
     ports:
       - "5432:5432"
     environment:
       POSTGRES_USER: ${DB_USER:-postgres}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
-      POSTGRES_DB: ${DB_NAME:-epita}
+      POSTGRES_DB: ${DB_NAME:-movies}
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./docker/init-scripts:/docker-entrypoint-initdb.d
     networks:
       - app-network
+    restart: unless-stopped
 
 networks:
   app-network:
