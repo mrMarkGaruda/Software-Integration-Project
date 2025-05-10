@@ -1,0 +1,75 @@
+version: '3.8'
+
+services:
+  app:
+    container_name: movie-app-release
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      target: prod
+      args:
+        NODE_ENV: production
+    ports:
+      - "8080:8080"
+    environment:
+      NODE_ENV: production
+    env_file:
+      - .env.release
+    depends_on:
+      - mongodb
+      - postgres
+    networks:
+      - app-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
+
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb-release
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    environment:
+      MONGO_INITDB_DATABASE: epita
+    networks:
+      - app-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.30'
+          memory: 512M
+
+  postgres:
+    image: postgres:13-alpine
+    container_name: postgres-release
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/init-scripts:/docker-entrypoint-initdb.d
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres_release_pwd}
+      POSTGRES_DB: ${DB_NAME:-movies}
+    networks:
+      - app-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.30'
+          memory: 512M
+
+volumes:
+  mongodb_data:
+  postgres_data:
+
+networks:
+  app-network:
+    driver: bridge
