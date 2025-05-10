@@ -79,12 +79,12 @@ const handleError = (): void => {
  */
 const startApp = (): void => {
   mongoose
-    .connect('mongodb://localhost:27017/epita')
+    .connect('mongodb://mongodb:27017/epita')
     .then(() => {
       logger.info('MongoDB Connected');
       registerCoreMiddleWare();
-      app.listen(PORT, () => {
-        logger.info(`Listening on 127.0.0.1:${PORT}`);
+      app.listen(PORT, '0.0.0.0', () => {
+        logger.info(`Server listening on port ${PORT}`);
       });
       handleError();
     })
