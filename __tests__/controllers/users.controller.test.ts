@@ -1,4 +1,5 @@
 jest.mock('../../src-ts/boot/database/db_connect', () => {
+  // Both connect and query are jest mocks.
   return {
     connect: jest.fn(),
     query: jest.fn(),
@@ -12,6 +13,7 @@ jest.mock('../../src-ts/middleware/winston', () => ({
   stream: { write: jest.fn() },
 }));
 
+// 3) Mock jsonwebtoken.sign
 jest.mock('jsonwebtoken', () => ({
   sign: jest.fn(),
 }));
