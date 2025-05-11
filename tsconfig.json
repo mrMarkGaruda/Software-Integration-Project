@@ -20,6 +20,6 @@
     "skipLibCheck": true,
     "allowJs": true
   },
-  "include": ["src-ts", "types"],
+  "include": ["src-ts", "types", "__tests__"],
   "exclude": ["node_modules", "dist"]
 }

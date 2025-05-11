@@ -15,7 +15,7 @@ declare namespace NodeJS {
   }
 }
 
-// 2. Extend Express’s Request (via express‑serve‑static‑core)
+// 2. Extend Express's Request (via express‑serve‑static‑core)
 declare module 'express-serve-static-core' {
   interface Request {
     user?: {
@@ -27,6 +27,14 @@ declare module 'express-serve-static-core' {
 
 // 3. Extend session data
 declare module 'express-session' {
+  interface Session {
+    user?: {
+      _id?: string;
+      email?: string;
+    };
+  }
+
+  // Keep the original declaration too
   interface SessionData {
     user?: {
       _id?: string;
