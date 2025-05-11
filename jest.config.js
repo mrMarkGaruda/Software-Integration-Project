@@ -2,4 +2,5 @@
 module.exports = {
   testEnvironment: 'node',
   transform: { '^.+\\.ts$': 'ts-jest' }, // ✅ this is actually correct
+  testMatch: ['**/src/**/*.test.ts'],
 };

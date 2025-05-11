@@ -2,15 +2,12 @@ version: '3.8'
 
 services:
   app:
-    container_name: movie-app-prod
     build:
       context: .
       dockerfile: docker/Dockerfile
       target: prod
       args:
         NODE_ENV: production
-    ports:
-      - "8080:8080"
     environment:
       NODE_ENV: production
     env_file:
@@ -64,6 +61,7 @@ services:
     environment:
       ME_CONFIG_MONGODB_SERVER: mongodb
       ME_CONFIG_MONGODB_PORT: 27017
+      ME_CONFIG_MONGODB_URL: mongodb://mongodb:27017
       ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_USERNAME:-mongo_production_user}
       ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_PASSWORD:-prod_mongo_secure_pwd}
       ME_CONFIG_BASICAUTH_USERNAME: ${MONGO_EXPRESS_USER:-admin}
@@ -154,6 +152,7 @@ services:
     volumes:
       - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./docker/nginx/ssl:/etc/nginx/ssl:ro
+      - ./docker/nginx/.htpasswd:/etc/nginx/.htpasswd:ro
     ports:
       - "80:80"
       - "443:443"
@@ -163,6 +162,11 @@ services:
     networks:
       - app-network
     restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
 
 volumes:
   mongodb_data:

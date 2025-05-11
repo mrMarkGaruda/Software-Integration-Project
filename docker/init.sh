@@ -92,5 +92,31 @@ if [ ! -f "$ENV_FILE" ]; then
   cp .env.$ENV .env || echo "# Default environment for $ENV" > .env
 fi
 
+# MongoDB Express setup
+if [ "$ENV" = "prod" ]; then
+  print_message "$GREEN" "Setting up MongoDB Express for production..."
+  
+  # Create .htpasswd file for Nginx if it doesn't exist
+  if [ ! -f "docker/nginx/.htpasswd" ]; then
+    print_message "$YELLOW" "Creating .htpasswd file for MongoDB Express authentication..."
+    
+    # Check if htpasswd utility is available
+    if command -v htpasswd &> /dev/null; then
+      # Get or create admin password
+      MONGO_EXPRESS_PW=${ME_CONFIG_BASICAUTH_PASSWORD:-prod_admin_secure_password}
+      htpasswd -bc docker/nginx/.htpasswd ${ME_CONFIG_BASICAUTH_USERNAME:-admin} $MONGO_EXPRESS_PW
+    else
+      print_message "$YELLOW" "htpasswd utility not found. Please run setup-htpasswd.sh manually."
+      touch docker/nginx/.htpasswd  # Create empty file as placeholder
+    fi
+  fi
+  
+  print_message "$YELLOW" "For production, MongoDB Express needs additional setup."
+  print_message "$YELLOW" "After starting the containers, run: ./setup-mongo-replica.sh"
+fi
+
+print_message "$GREEN" "Environment initialized successfully for $ENV!"
+print_message "$GREEN" "You can now run: ./docker-run.sh $ENV up"
+
 print_message "$GREEN" "Environment initialized successfully for $ENV!"
 print_message "$GREEN" "You can now run: ./docker-run.sh $ENV up"
