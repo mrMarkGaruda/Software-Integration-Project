@@ -56,6 +56,32 @@ services:
           cpus: '1.0'
           memory: 2G
 
+  mongo-express:
+    image: mongo-express:latest
+    container_name: mongo-express-prod
+    expose:
+      - "8081"
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongodb
+      ME_CONFIG_MONGODB_PORT: 27017
+      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_USERNAME:-mongo_production_user}
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_PASSWORD:-prod_mongo_secure_pwd}
+      ME_CONFIG_BASICAUTH_USERNAME: ${MONGO_EXPRESS_USER:-admin}
+      ME_CONFIG_BASICAUTH_PASSWORD: ${MONGO_EXPRESS_PASSWORD:-prod_admin_secure_password}
+      ME_CONFIG_SITE_SSL_ENABLED: "true"
+      ME_CONFIG_OPTIONS_EDITORTHEME: "ambiance"
+      ME_CONFIG_REQUEST_SIZE: "100kb"
+    networks:
+      - app-network
+    depends_on:
+      - mongodb
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 256M
+
   mongodb_backup:
     image: mongo:latest
     container_name: mongodb-backup
@@ -133,6 +159,7 @@ services:
       - "443:443"
     depends_on:
       - app
+      - mongo-express
     networks:
       - app-network
     restart: always

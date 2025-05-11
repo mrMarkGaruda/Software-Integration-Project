@@ -45,6 +45,28 @@ services:
           cpus: '0.30'
           memory: 512M
 
+  mongo-express:
+    image: mongo-express:latest
+    container_name: mongo-express-release
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongodb
+      ME_CONFIG_MONGODB_PORT: 27017
+      ME_CONFIG_MONGODB_ENABLE_ADMIN: "true"
+      ME_CONFIG_BASICAUTH_USERNAME: admin
+      ME_CONFIG_BASICAUTH_PASSWORD: release_admin
+    networks:
+      - app-network
+    depends_on:
+      - mongodb
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.20'
+          memory: 256M
+
   postgres:
     image: postgres:13-alpine
     container_name: postgres-release

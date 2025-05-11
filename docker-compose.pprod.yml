@@ -51,6 +51,30 @@ services:
           cpus: '0.75'
           memory: 1G
 
+  mongo-express:
+    image: mongo-express:latest
+    container_name: mongo-express-pprod
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongodb
+      ME_CONFIG_MONGODB_PORT: 27017
+      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_USERNAME:-mongo_user}
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_PASSWORD:-pprod_mongo_pwd}
+      ME_CONFIG_BASICAUTH_USERNAME: admin
+      ME_CONFIG_BASICAUTH_PASSWORD: pprod_admin
+      ME_CONFIG_SITE_SSL_ENABLED: "false"
+    networks:
+      - app-network
+    depends_on:
+      - mongodb
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 256M
+
   postgres:
     image: postgres:13-alpine
     container_name: postgres-pprod
