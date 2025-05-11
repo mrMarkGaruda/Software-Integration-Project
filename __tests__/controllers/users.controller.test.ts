@@ -1,19 +1,19 @@
-jest.mock('../../src-ts/boot/database/db_connect', () => {
-  // Both connect and query are jest mocks.
-  return {
-    connect: jest.fn(),
+// __tests__/controllers/users.controller.test.ts
+
+jest.mock('../../src-ts/boot/database/db_connect', () => ({
+  __esModule: true,
+  default: {
     query: jest.fn(),
-  };
-});
+  },
+}));
 
 jest.mock('../../src-ts/middleware/winston', () => ({
   info: jest.fn(),
-  http: jest.fn(),
   error: jest.fn(),
+  http: jest.fn(),
   stream: { write: jest.fn() },
 }));
 
-// 3) Mock jsonwebtoken.sign
 jest.mock('jsonwebtoken', () => ({
   sign: jest.fn(),
 }));
@@ -21,7 +21,7 @@ jest.mock('jsonwebtoken', () => ({
 import request from 'supertest';
 import express from 'express';
 import session from 'express-session';
-import pool from '../../src-ts/boot/database/db_connect'; // now the pool.query mock
+import pool from '../../src-ts/boot/database/db_connect';
 import * as usersController from '../../src-ts/controllers/users.controller';
 import jwt from 'jsonwebtoken';
 import statusCodes from '../../src-ts/constants/statusCodes';
@@ -31,6 +31,8 @@ describe('Users Controller', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+
+    process.env.JWT_SECRET_KEY = 'test-secret'; // needed for jwt.sign to work
 
     app = express();
     app.use(express.json());
@@ -42,28 +44,22 @@ describe('Users Controller', () => {
 
   describe('POST /login', () => {
     it('200 and token on success', async () => {
-      // Arrange: stub pool.query to invoke callback with a user row
-      const fakeRow = { email: 'a@a.com', username: 'usr' };
+      const userRow = { email: 'a@a.com', username: 'usr' };
 
+      // Mock pool.query to use callback-style
       (pool.query as jest.Mock).mockImplementation(
-        (
-          _sql: string,
-          _params: any[],
-          cb: (err: Error | null, rows?: any) => void
-        ) => {
-          cb(null, { rows: [fakeRow] });
+        (_sql: string, _params: any[], callback: Function) => {
+          callback(null, { rows: [userRow] });
         }
       );
 
-      // Arrange: stub jwt.sign
+      // Mock jwt.sign
       (jwt.sign as jest.Mock).mockReturnValue('tok');
 
-      // Act
       const res = await request(app)
         .post('/login')
         .send({ email: 'a@a.com', password: 'p' });
 
-      // Assert
       expect(res.status).toBe(statusCodes.success);
       expect(res.body).toEqual({ token: 'tok', username: 'usr' });
     });
