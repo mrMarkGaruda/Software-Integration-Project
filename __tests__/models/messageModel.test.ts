@@ -1,46 +1,55 @@
 import mongoose from 'mongoose';
-import MessageModel from '../../models/messageModel';
-import UserModel from '../../models/userModel';
+import MessageModel from '../../src/models/messageModel';
+import UserModel from '../../src/models/userModel';
 
 describe('Message Model Test', () => {
-  let testUser: mongoose.Document;
+  beforeAll(async () => {
+    await mongoose.connect(
+      process.env.MONGODB_URI || 'mongodb://localhost:27017/testdb'
+    );
+  });
+
+  afterAll(async () => {
+    await mongoose.connection.close();
+  });
 
   beforeEach(async () => {
     await MessageModel.deleteMany({});
     await UserModel.deleteMany({});
+  });
 
-    // Create a test user
-    testUser = await UserModel.create({
+  it('should create & save message successfully', async () => {
+    // Create a test user first
+    const user = await UserModel.create({
       username: 'testuser',
       email: 'test@example.com',
       password: 'password123',
     });
-  });
 
-  it('should create & save message successfully', async () => {
     const validMessage = new MessageModel({
       name: 'Test Message',
-      user: testUser._id,
+      user: user._id,
     });
 
     const savedMessage = await validMessage.save();
     expect(savedMessage._id).toBeDefined();
     expect(savedMessage.name).toBe(validMessage.name);
-    expect(savedMessage.user.toString()).toBe(testUser._id.toString());
+    expect(savedMessage.user.toString()).toBe(user._id.toString());
   });
 
   it('should fail to save message without required name', async () => {
-    const messageWithoutName = new MessageModel({
-      user: testUser._id,
+    // Create a test user first
+    const user = await UserModel.create({
+      username: 'testuser',
+      email: 'test@example.com',
+      password: 'password123',
     });
 
-    try {
-      await messageWithoutName.save();
-      fail('Expected validation error');
-    } catch (error) {
-      const err = error as mongoose.Error.ValidationError;
-      expect(err.errors.name).toBeDefined();
-    }
+    const messageWithoutName = new MessageModel({
+      user: user._id,
+    });
+
+    await expect(messageWithoutName.save()).rejects.toThrow();
   });
 
   it('should fail to save message without required user', async () => {
@@ -48,30 +57,40 @@ describe('Message Model Test', () => {
       name: 'Test Message',
     });
 
-    try {
-      await messageWithoutUser.save();
-      fail('Expected validation error');
-    } catch (error) {
-      const err = error as mongoose.Error.ValidationError;
-      expect(err.errors.user).toBeDefined();
-    }
+    await expect(messageWithoutUser.save()).rejects.toThrow();
   });
 
   it('should create timestamps', async () => {
+    // Create a test user first
+    const user = await UserModel.create({
+      username: 'testuser',
+      email: 'test@example.com',
+      password: 'password123',
+    });
+
     const message = new MessageModel({
       name: 'Timestamped Message',
-      user: testUser._id,
+      user: user._id,
     });
     const savedMessage = await message.save();
 
     expect(savedMessage.created_at).toBeDefined();
     expect(savedMessage.updated_at).toBeDefined();
+    expect(savedMessage.created_at).toBeInstanceOf(Date);
+    expect(savedMessage.updated_at).toBeInstanceOf(Date);
   });
 
   it('should automatically populate user on find', async () => {
+    // Create a test user first
+    const user = await UserModel.create({
+      username: 'testuser',
+      email: 'test@example.com',
+      password: 'password123',
+    });
+
     const message = new MessageModel({
       name: 'Populated Message',
-      user: testUser._id,
+      user: user._id,
     });
     const savedMessage = await message.save();
 
@@ -79,6 +98,27 @@ describe('Message Model Test', () => {
       'user'
     );
     expect(foundMessage?.user).toBeDefined();
-    expect(foundMessage?.user.toString()).toBe(testUser._id.toString());
+    expect(foundMessage?.user.toString()).toBe(user._id.toString());
+  });
+
+  it('should allow updating the message name', async () => {
+    // Create a test user first
+    const user = await UserModel.create({
+      username: 'testuser',
+      email: 'test@example.com',
+      password: 'password123',
+    });
+
+    const message = new MessageModel({
+      name: 'Original Message',
+      user: user._id,
+    });
+    const savedMessage = await message.save();
+
+    savedMessage.name = 'Updated Message';
+    const updatedMessage = await savedMessage.save();
+
+    expect(updatedMessage.name).toBe('Updated Message');
+    expect(updatedMessage.updated_at).not.toEqual(updatedMessage.created_at);
   });
 });

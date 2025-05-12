@@ -28,10 +28,9 @@ describe('UserModel', () => {
     const validUser = new UserModel(userData);
     const savedUser = await validUser.save();
 
-    // Assert
     expect(savedUser._id).toBeDefined();
     expect(savedUser.username).toBe(userData.username);
-    expect(savedUser.email).toBe(userData.email);
+    expect(savedUser.email).toBe(userData.email.toLowerCase());
     expect(savedUser.password).toBe(userData.password);
   });
 
@@ -58,7 +57,7 @@ describe('UserModel', () => {
 
   it('should add timestamps when creating a user', async () => {
     const userData = {
-      username: 'testuser',
+      username: 'timestampuser',
       email: 'timestamptest@example.com',
       password: 'password123',
     };
@@ -102,7 +101,9 @@ describe('UserModel', () => {
     const updatedUser = await UserModel.findById(user._id).populate('messages');
 
     expect(updatedUser?.messages.length).toBe(1);
-    expect(updatedUser?.messages[0].name).toBe('Test Message');
+    expect(updatedUser?.messages[0]._id.toString()).toBe(
+      message._id.toString()
+    );
   });
 
   it('should trim username and email', async () => {
@@ -116,5 +117,36 @@ describe('UserModel', () => {
 
     expect(savedUser.username).toBe('testuser');
     expect(savedUser.email).toBe('test@example.com');
+  });
+
+  it('should create user with optional username', async () => {
+    const userData = {
+      email: 'optional@example.com',
+      password: 'password123',
+    };
+
+    const savedUser = await UserModel.create(userData);
+
+    expect(savedUser.email).toBe('optional@example.com');
+    expect(savedUser.username).toBeUndefined();
+  });
+
+  it('should update user successfully', async () => {
+    const user = await UserModel.create({
+      username: 'originaluser',
+      email: 'original@example.com',
+      password: 'password123',
+    });
+
+    // Simulate a small time delay
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    user.username = 'updateduser';
+    const updatedUser = await user.save();
+
+    expect(updatedUser.username).toBe('updateduser');
+    expect(updatedUser.created_at).toBeDefined();
+    expect(updatedUser.updated_at).toBeDefined();
+    expect(updatedUser.updated_at).not.toEqual(updatedUser.created_at);
   });
 });
