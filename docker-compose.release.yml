@@ -16,7 +16,7 @@ services:
     env_file:
       - .env.release
     depends_on:
-      - mongodb
+      - mongo
       - postgres
     networks:
       - app-network
@@ -27,13 +27,13 @@ services:
           cpus: '0.50'
           memory: 512M
 
-  mongodb:
+  mongo:
     image: mongo:latest
-    container_name: mongodb-release
+    container_name: mongo-release
     ports:
       - "27017:27017"
     volumes:
-      - mongodb_data:/data/db
+      - mongo_data:/data/db
     environment:
       MONGO_INITDB_DATABASE: epita
     networks:
@@ -44,6 +44,34 @@ services:
         limits:
           cpus: '0.30'
           memory: 512M
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mongo-express:
+    image: mongo-express:latest
+    container_name: mongo-express-release
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongo
+      ME_CONFIG_MONGODB_PORT: 27017
+      ME_CONFIG_MONGODB_ENABLE_ADMIN: "true"
+      ME_CONFIG_BASICAUTH_USERNAME: admin
+      ME_CONFIG_BASICAUTH_PASSWORD: release_admin
+    networks:
+      - app-network
+    depends_on:
+      mongo:
+        condition: service_healthy
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.20'
+          memory: 256M
 
   postgres:
     image: postgres:13-alpine
@@ -67,7 +95,7 @@ services:
           memory: 512M
 
 volumes:
-  mongodb_data:
+  mongo_data:
   postgres_data:
 
 networks:

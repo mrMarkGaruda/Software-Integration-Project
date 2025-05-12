@@ -1,0 +1,976 @@
+{
+  "info": {
+    "_postman_id": "7c08befd-daaa-48b7-8a33-3469024e7990",
+    "name": "Movie App API Tests",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "38840193"
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "MongoDB - Sign Up",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has valid user data\", function() {",
+                  "    const responseData = pm.response.json();",
+                  "    pm.expect(responseData).to.have.property('_id');",
+                  "    pm.expect(responseData).to.have.property('email');",
+                  "    pm.expect(responseData).to.have.property('username');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"username\": \"testuser\",\n    \"email\": \"testuser@example.com\",\n    \"password\": \"Test123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/signup",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "signup"]
+            },
+            "description": "Create a new user in MongoDB"
+          },
+          "response": []
+        },
+        {
+          "name": "MongoDB - Sign In",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has token\", function() {",
+                  "    const responseData = pm.response.json();",
+                  "    pm.expect(responseData).to.have.property('token');",
+                  "    ",
+                  "    // Save token for subsequent requests",
+                  "    pm.collectionVariables.set('mongodb_token', responseData.token);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"testuser@example.com\",\n    \"password\": \"Test123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Sign in with existing user in MongoDB"
+          },
+          "response": []
+        },
+        {
+          "name": "MongoDB - Get User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has user data\", function() {",
+                  "    const responseData = pm.response.json();",
+                  "    pm.expect(responseData).to.have.property('_id');",
+                  "    pm.expect(responseData).to.have.property('email');",
+                  "    pm.expect(responseData).to.have.property('username');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "me"]
+            },
+            "description": "Get current user profile from MongoDB"
+          },
+          "response": []
+        },
+        {
+          "name": "MongoDB - Logout",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Logout successful\", function() {",
+                  "    const responseData = pm.response.json();",
+                  "    pm.expect(responseData).to.have.property('message');",
+                  "    pm.expect(responseData.message).to.equal('Disconnected');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "logout"]
+            },
+            "description": "Logout user session in MongoDB"
+          },
+          "response": []
+        },
+        {
+          "name": "PostgreSQL - Register",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"User creation successful\", function() {",
+                  "    const responseData = pm.response.json();",
+                  "    pm.expect(responseData).to.have.property('message');",
+                  "    pm.expect(responseData.message).to.equal('User created');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"username\": \"postgresuser\",\n    \"email\": \"postgresuser@example.com\",\n    \"password\": \"Test123!\",\n    \"country\": \"United States\",\n    \"city\": \"New York\",\n    \"street\": \"123 Main St\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "register"]
+            },
+            "description": "Register new user in PostgreSQL"
+          },
+          "response": []
+        },
+        {
+          "name": "PostgreSQL - Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has token and username\", function() {",
+                  "    const responseData = pm.response.json();",
+                  "    pm.expect(responseData).to.have.property('token');",
+                  "    pm.expect(responseData).to.have.property('username');",
+                  "    ",
+                  "    // Save token for subsequent requests",
+                  "    pm.collectionVariables.set('postgres_token', responseData.token);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"postgresuser@example.com\",\n    \"password\": \"Test123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "login"]
+            },
+            "description": "Login with PostgreSQL user credentials"
+          },
+          "response": []
+        }
+      ],
+      "description": "Authentication-related endpoints"
+    },
+    {
+      "name": "Movies",
+      "item": [
+        {
+          "name": "Get All Movies",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has movies object\", function() {",
+                  "    const responseData = pm.response.json();",
+                  "    pm.expect(responseData).to.have.property('movies');",
+                  "    pm.expect(responseData.movies).to.be.an('object');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{postgres_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/movies",
+              "host": ["{{baseUrl}}"],
+              "path": ["movies"]
+            },
+            "description": "Get all movies grouped by type"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Movies By Category",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has movies array\", function() {",
+                  "    const responseData = pm.response.json();",
+                  "    pm.expect(responseData).to.have.property('movies');",
+                  "    pm.expect(responseData.movies).to.be.an('array');",
+                  "});",
+                  "",
+                  "pm.test(\"All movies have the correct category\", function() {",
+                  "    const responseData = pm.response.json();",
+                  "    const category = pm.request.url.query.get('category');",
+                  "    ",
+                  "    if (responseData.movies.length > 0) {",
+                  "        responseData.movies.forEach(movie => {",
+                  "            pm.expect(movie.type).to.equal(category);",
+                  "        });",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{postgres_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/movies?category=movie",
+              "host": ["{{baseUrl}}"],
+              "path": ["movies"],
+              "query": [
+                {
+                  "key": "category",
+                  "value": "movie"
+                }
+              ]
+            },
+            "description": "Get movies filtered by category"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Top Rated Movies",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has movies array\", function() {",
+                  "    const responseData = pm.response.json();",
+                  "    pm.expect(responseData).to.have.property('movies');",
+                  "    pm.expect(responseData.movies).to.be.an('array');",
+                  "});",
+                  "",
+                  "pm.test(\"Movies are sorted by rating in descending order\", function() {",
+                  "    const responseData = pm.response.json();",
+                  "    const movies = responseData.movies;",
+                  "    ",
+                  "    if (movies.length > 1) {",
+                  "        for (let i = 0; i < movies.length - 1; i++) {",
+                  "            pm.expect(parseFloat(movies[i].rating)).to.be.at.least(parseFloat(movies[i + 1].rating));",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{postgres_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/movies/top",
+              "host": ["{{baseUrl}}"],
+              "path": ["movies", "top"]
+            },
+            "description": "Get top rated movies"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Seen Movies",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has movies array\", function() {",
+                  "    const responseData = pm.response.json();",
+                  "    pm.expect(responseData).to.have.property('movies');",
+                  "    pm.expect(responseData.movies).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{postgres_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/movies/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["movies", "me"]
+            },
+            "description": "Get movies seen by the current user"
+          },
+          "response": []
+        }
+      ],
+      "description": "Movie-related endpoints"
+    },
+    {
+      "name": "Comments",
+      "item": [
+        {
+          "name": "Get Comments By Movie ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has comments array\", function() {",
+                  "    const responseData = pm.response.json();",
+                  "    pm.expect(responseData).to.have.property('comments');",
+                  "    pm.expect(responseData.comments).to.be.an('array');",
+                  "});",
+                  "",
+                  "pm.test(\"All comments belong to the requested movie\", function() {",
+                  "    const responseData = pm.response.json();",
+                  "    const movieId = pm.request.url.path[1];",
+                  "    ",
+                  "    if (responseData.comments.length > 0) {",
+                  "        responseData.comments.forEach(comment => {",
+                  "            pm.expect(comment.movie_id).to.equal(parseInt(movieId));",
+                  "        });",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{postgres_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/comments/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["comments", "1"]
+            },
+            "description": "Get comments for a specific movie"
+          },
+          "response": []
+        },
+        {
+          "name": "Add Comment",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Comment was added successfully\", function() {",
+                  "    const responseData = pm.response.json();",
+                  "    pm.expect(responseData).to.have.property('message');",
+                  "    pm.expect(responseData.message).to.equal('Comment added');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{postgres_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"rating\": 4,\n    \"username\": \"postgresuser\",\n    \"comment\": \"This movie was really good!\",\n    \"title\": \"Great Experience\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/comments/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["comments", "1"]
+            },
+            "description": "Add a new comment to a movie"
+          },
+          "response": []
+        }
+      ],
+      "description": "Comment-related endpoints"
+    },
+    {
+      "name": "Ratings",
+      "item": [
+        {
+          "name": "Add Rating",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Rating was added successfully\", function() {",
+                  "    const responseData = pm.response.json();",
+                  "    pm.expect(responseData).to.have.property('message');",
+                  "    pm.expect(responseData.message).to.equal('Rating added');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{postgres_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"rating\": 4\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/ratings/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["ratings", "1"]
+            },
+            "description": "Add a rating to a movie"
+          },
+          "response": []
+        }
+      ],
+      "description": "Rating-related endpoints"
+    },
+    {
+      "name": "Messages",
+      "item": [
+        {
+          "name": "Get All Messages",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response is an array\", function() {",
+                  "    const responseData = pm.response.json();",
+                  "    pm.expect(responseData).to.be.an('array');",
+                  "    ",
+                  "    // Check if the response is not empty before trying to access the first element",
+                  "    if (responseData.length > 0 && responseData[0].hasOwnProperty('_id')) {",
+                  "        pm.environment.set('message_id', responseData[0]._id);",
+                  "    } else {",
+                  "        console.warn(\"Response array is empty or does not contain '_id' property. message_id not set.\");",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{mongodb_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/messages",
+              "host": ["{{baseUrl}}"],
+              "path": ["messages"]
+            },
+            "description": "Get all messages"
+          },
+          "response": []
+        },
+        {
+          "name": "Add Message",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has message data\", function() {",
+                  "    const responseData = pm.response.json();",
+                  "    pm.expect(responseData).to.have.property('_id');",
+                  "    pm.expect(responseData).to.have.property('name');",
+                  "    pm.expect(responseData).to.have.property('user');",
+                  "    ",
+                  "    // Save message ID for subsequent requests",
+                  "    pm.collectionVariables.set('message_id', responseData._id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{mongodb_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"message\": {\n        \"name\": \"Test message\"\n    }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/messages/add/message",
+              "host": ["{{baseUrl}}"],
+              "path": ["messages", "add", "message"]
+            },
+            "description": "Add a new message"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Message By ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has message data\", function() {",
+                  "    const responseData = pm.response.json();",
+                  "    pm.expect(responseData).to.have.property('_id');",
+                  "    pm.expect(responseData).to.have.property('name');",
+                  "    pm.expect(responseData).to.have.property('user');",
+                  "    ",
+                  "    // Verify the correct message was returned",
+                  "    const messageId = pm.collectionVariables.get('message_id');",
+                  "    pm.expect(responseData._id).to.equal(messageId);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{mongodb_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/messages/{{message_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["messages", "{{message_id}}"]
+            },
+            "description": "Get a specific message by ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Edit Message",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has updated message data\", function() {",
+                  "    const responseData = pm.response.json();",
+                  "    pm.expect(responseData).to.have.property('_id');",
+                  "    pm.expect(responseData).to.have.property('name');",
+                  "    pm.expect(responseData).to.have.property('user');",
+                  "    ",
+                  "    // Verify the message name was updated",
+                  "    pm.expect(responseData.name).to.equal('Updated message');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{mongodb_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Updated message\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/messages/edit/{{message_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["messages", "edit", "{{message_id}}"]
+            },
+            "description": "Edit an existing message"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Message",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Message was deleted successfully\", function() {",
+                  "    const responseData = pm.response.json();",
+                  "    pm.expect(responseData).to.have.property('message');",
+                  "    pm.expect(responseData.message).to.equal('Message deleted');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{mongodb_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/messages/delete/{{message_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["messages", "delete", "{{message_id}}"]
+            },
+            "description": "Delete an existing message"
+          },
+          "response": []
+        }
+      ],
+      "description": "Message-related endpoints"
+    },
+    {
+      "name": "Profile",
+      "item": [
+        {
+          "name": "Edit Password",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Password was updated successfully\", function() {",
+                  "    const responseData = pm.response.json();",
+                  "    pm.expect(responseData).to.have.property('message');",
+                  "    pm.expect(responseData.message).to.equal('Password updated');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{postgres_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"oldPassword\": \"Test123!\",\n    \"newPassword\": \"NewTest456!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/profile/password",
+              "host": ["{{baseUrl}}"],
+              "path": ["profile", "password"]
+            },
+            "description": "Update user password"
+          },
+          "response": []
+        }
+      ],
+      "description": "Profile-related endpoints"
+    },
+    {
+      "name": "System",
+      "item": [
+        {
+          "name": "Health Check",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response body indicates health\", function() {",
+                  "    const responseData = pm.response.json();",
+                  "    pm.expect(responseData).to.have.property('message');",
+                  "    pm.expect(responseData.message).to.equal('All up and running !!');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "health"]
+            },
+            "description": "Tests the health check endpoint to verify the API is running properly"
+          },
+          "response": []
+        },
+        {
+          "name": "404 Not Found Test",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 404\", function() {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "",
+                  "pm.test(\"Response body indicates not found\", function() {",
+                  "    const responseData = pm.response.json();",
+                  "    pm.expect(responseData).to.have.property('error');",
+                  "    pm.expect(responseData.error).to.have.property('message');",
+                  "    pm.expect(responseData.error.message).to.equal('Not Found');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/non-existent-endpoint",
+              "host": ["{{baseUrl}}"],
+              "path": ["non-existent-endpoint"]
+            },
+            "description": "Tests the 404 handler by requesting a non-existent endpoint"
+          },
+          "response": []
+        }
+      ],
+      "description": "System-level tests"
+    }
+  ]
+}

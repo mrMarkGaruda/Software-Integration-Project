@@ -56,4 +56,4 @@ RUN npm ci --only=production --no-audit --no-fund
 COPY --from=builder /app/dist ./dist
 COPY .env* ./
 EXPOSE 8080
-CMD ["node", "dist/src-ts/index.js"]
+CMD ["node", "dist/index.js"]

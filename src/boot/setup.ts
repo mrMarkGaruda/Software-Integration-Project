@@ -22,6 +22,8 @@ import commentsRoutes from '../routes/comments.routes';
 const PORT: number = Number(process.env.PORT) || 8080;
 const app: Application = express();
 
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://mongo:27017/epita';
+
 /**
  * Register core middleware components for the Express application
  */
@@ -79,7 +81,7 @@ const handleError = (): void => {
  */
 const startApp = (): void => {
   mongoose
-    .connect('mongodb://mongodb:27017/epita')
+    .connect(MONGODB_URI)
     .then(() => {
       logger.info('MongoDB Connected');
       registerCoreMiddleWare();

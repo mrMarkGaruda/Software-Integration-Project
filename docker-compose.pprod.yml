@@ -16,7 +16,7 @@ services:
     env_file:
       - .env.pprod
     depends_on:
-      - mongodb
+      - mongo
       - postgres
       - redis
     networks:
@@ -33,11 +33,11 @@ services:
         delay: 10s
         order: start-first
 
-  mongodb:
+  mongo:
     image: mongo:latest
-    container_name: mongodb-pprod
+    container_name: mongo-pprod
     volumes:
-      - mongodb_data:/data/db
+      - mongo_data:/data/db
     environment:
       MONGO_INITDB_DATABASE: epita
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME:-mongo_user}
@@ -50,6 +50,36 @@ services:
         limits:
           cpus: '0.75'
           memory: 1G
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mongo-express:
+    image: mongo-express:latest
+    container_name: mongo-express-pprod
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongo
+      ME_CONFIG_MONGODB_PORT: 27017
+      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_USERNAME:-mongo_user}
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_PASSWORD:-pprod_mongo_pwd}
+      ME_CONFIG_BASICAUTH_USERNAME: admin
+      ME_CONFIG_BASICAUTH_PASSWORD: pprod_admin
+      ME_CONFIG_SITE_SSL_ENABLED: "false"
+    networks:
+      - app-network
+    depends_on:
+      mongo:
+        condition: service_healthy
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 256M
 
   postgres:
     image: postgres:13-alpine
@@ -82,7 +112,7 @@ services:
     restart: unless-stopped
 
 volumes:
-  mongodb_data:
+  mongo_data:
   postgres_data:
   redis_data:
 
