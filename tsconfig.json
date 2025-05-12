@@ -3,7 +3,7 @@
     "incremental": false,
     "target": "es2016",
     "module": "commonjs",
-    "rootDir": "./src",
+    "rootDir": "./",
     "baseUrl": "./",
     "resolveJsonModule": true,
     "declaration": true,
@@ -20,6 +20,6 @@
     "skipLibCheck": true,
     "allowJs": true
   },
-  "include": ["src", "types"],
+  "include": ["src", "types", "__tests__"],
   "exclude": ["node_modules", "dist"]
 }
