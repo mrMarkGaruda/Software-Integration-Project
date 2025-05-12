@@ -1,0 +1,56 @@
+name: Postman API Tests
+
+on:
+  pull_request:
+    branches: [dev, release, pprod, prod]
+  workflow_dispatch:  # Allow manual triggering
+
+jobs:
+  postman-tests:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4.2.2
+    
+    # Setup Node.js
+    - name: Use Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+    
+    # Install Newman CLI globally
+    - name: Install Newman
+      run: npm install -g newman
+    
+    # Install environment variables package for Newman
+    - name: Install newman-reporter-htmlextra
+      run: npm install -g newman-reporter-htmlextra
+    
+    # Create directory for test reports
+    - name: Create Reports Directory
+      run: mkdir -p newman-reports
+    
+    # Run Postman Collection Tests
+    - name: Run Postman Collection Tests
+      run: |
+        newman run "postman/collection.json" \
+          -e "postman/environment.json" \
+          -r htmlextra \
+          --reporter-htmlextra-export newman-reports/report.html
+    
+    # Upload test results as artifact
+    - name: Upload Test Results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: postman-test-results
+        path: newman-reports
+        retention-days: 7
+    
+    # Check test results and fail if tests fail
+    - name: Check Test Results
+      run: |
+        if [ $(find newman-reports -name "*.html" | wc -l) -eq 0 ]; then
+          echo "No test reports found"
+          exit 1
+        fi
