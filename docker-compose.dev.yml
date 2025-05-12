@@ -2,44 +2,37 @@ version: '3.8'
 
 services:
 
-app:
-  container_name: movie-app-dev
-  build:
-    context: .
-    dockerfile: docker/Dockerfile
-    target: dev
-    args:
+  app:
+    container_name: movie-app-dev
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      target: dev
+      args:
+        NODE_ENV: development
+    volumes:
+      - ./:/app:delegated
+      - /app/node_modules
+    ports:
+      - "8080:8080"
+    environment:
       NODE_ENV: development
-  volumes:
-    - ./:/app:delegated
-    - /app/node_modules
-  ports:
-    - "8080:8080"
-  environment:
-    NODE_ENV: development
-  env_file:
-    - .env.development
-  depends_on:
-    # Rely on Mongo's healthcheck
-    mongo:
-      condition: service_healthy
-    # Postgres healthcheck is recommended, but for now
-    # we'll assume it's started and init scripts are fast.
-    # If you add a healthcheck for postgres, change this to service_healthy
-    postgres:
-      condition: service_started
-  networks:
-    - app-network
-  restart: unless-stopped
-  # Add this healthcheck block:
-  healthcheck:
-    # This command runs inside the container.
-    # It tries to curl the health endpoint. -f makes it fail on non-2xx status codes.
-    test: ["CMD", "curl", "-f", "http://localhost:8080/api/health"]
-    interval: 10s # How often to check
-    timeout: 5s   # How long to wait for a response
-    retries: 5    # How many times to retry before marking as unhealthy
-    start_period: 30s # Optional: initial grace period before first check
+    env_file:
+      - .env.development
+    depends_on:
+      mongo:
+        condition: service_healthy
+      postgres:
+        condition: service_started
+    networks:
+      - app-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   mongo:
     image: mongo:latest
@@ -106,12 +99,12 @@ app:
     networks:
       - app-network
     restart: unless-stopped
-    
+
 volumes:
   mongo_data:
   postgres_data:
   pgadmin_data:
-  
+
 networks:
   app-network:
     driver: bridge
