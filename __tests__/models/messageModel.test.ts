@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose, { Types } from 'mongoose';
 import MessageModel from '../../src/models/messageModel';
 import UserModel from '../../src/models/userModel';
 
@@ -19,7 +19,6 @@ describe('Message Model Test', () => {
   });
 
   it('should create & save message successfully', async () => {
-    // Create a test user first
     const user = await UserModel.create({
       username: 'testuser',
       email: 'test@example.com',
@@ -38,7 +37,6 @@ describe('Message Model Test', () => {
   });
 
   it('should fail to save message without required name', async () => {
-    // Create a test user first
     const user = await UserModel.create({
       username: 'testuser',
       email: 'test@example.com',
@@ -61,7 +59,6 @@ describe('Message Model Test', () => {
   });
 
   it('should create timestamps', async () => {
-    // Create a test user first
     const user = await UserModel.create({
       username: 'testuser',
       email: 'test@example.com',
@@ -81,7 +78,6 @@ describe('Message Model Test', () => {
   });
 
   it('should automatically populate user on find', async () => {
-    // Create a test user first
     const user = await UserModel.create({
       username: 'testuser',
       email: 'test@example.com',
@@ -97,12 +93,15 @@ describe('Message Model Test', () => {
     const foundMessage = await MessageModel.findById(savedMessage._id).populate(
       'user'
     );
-    expect(foundMessage?.user).toBeDefined();
-    expect(foundMessage?.user.toString()).toBe(user._id.toString());
+
+    // Now `foundMessage.user` is the full User document,
+    // so we compare `foundMessage.user._id` to the original ID:
+    const populatedUser = foundMessage?.user as { _id: Types.ObjectId };
+    expect(populatedUser).toBeDefined();
+    expect(populatedUser._id.toString()).toBe(user._id.toString());
   });
 
   it('should allow updating the message name', async () => {
-    // Create a test user first
     const user = await UserModel.create({
       username: 'testuser',
       email: 'test@example.com',

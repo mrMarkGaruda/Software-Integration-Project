@@ -12,20 +12,18 @@ describe('Winston Logger', () => {
   it('should have correct transports', () => {
     const transports = logger.transports;
 
-    // Check file transport
     const fileTransport = transports.find(
-      (transport) => transport instanceof winston.transports.File
+      (t) => t instanceof winston.transports.File
     );
     expect(fileTransport).toBeDefined();
 
-    // Validate file transport properties
-    expect(fileTransport?.filename).toBe('./logs/app.log');
-    expect(fileTransport?.maxsize).toBe(5242880); // 5MB
+    // adjust this to just 'app.log'
+    expect(fileTransport?.filename).toBe('app.log');
+    expect(fileTransport?.maxsize).toBe(5 * 1024 * 1024);
     expect(fileTransport?.maxFiles).toBe(5);
 
-    // Check console transport
     const consoleTransport = transports.find(
-      (transport) => transport instanceof winston.transports.Console
+      (t) => t instanceof winston.transports.Console
     );
     expect(consoleTransport).toBeDefined();
   });

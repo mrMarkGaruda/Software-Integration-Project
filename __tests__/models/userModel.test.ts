@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose, { Types } from 'mongoose';
 import UserModel from '../../src/models/userModel';
 import MessageModel from '../../src/models/messageModel';
 
@@ -95,7 +95,8 @@ describe('UserModel', () => {
       user: user._id,
     });
 
-    user.messages.push(message._id);
+    user.messages.push(message._id as Types.ObjectId);
+
     await user.save();
 
     const updatedUser = await UserModel.findById(user._id).populate('messages');
