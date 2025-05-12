@@ -16,7 +16,7 @@ services:
     env_file:
       - .env.pprod
     depends_on:
-      - mongodb
+      - mongo
       - postgres
       - redis
     networks:
@@ -33,11 +33,11 @@ services:
         delay: 10s
         order: start-first
 
-  mongodb:
+  mongo:
     image: mongo:latest
-    container_name: mongodb-pprod
+    container_name: mongo-pprod
     volumes:
-      - mongodb_data:/data/db
+      - mongo_data:/data/db
     environment:
       MONGO_INITDB_DATABASE: epita
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME:-mongo_user}
@@ -72,7 +72,7 @@ services:
     networks:
       - app-network
     depends_on:
-      mongodb:
+      mongo:
         condition: service_healthy
     restart: unless-stopped
     deploy:
@@ -112,7 +112,7 @@ services:
     restart: unless-stopped
 
 volumes:
-  mongodb_data:
+  mongo_data:
   postgres_data:
   redis_data:
 

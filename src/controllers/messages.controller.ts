@@ -1,6 +1,13 @@
 import { Request, Response } from 'express';
 import MessageModel from '../models/messageModel';
+import userModel from '../models/userModel';
 import logger from '../middleware/winston';
+
+interface AuthenticatedRequest extends Request {
+  user?: {
+    email: string;
+  };
+}
 
 export const getMessages = async (
   _req: Request,
@@ -28,7 +35,7 @@ export const getMessageById = async (
 };
 
 export const addMessage = async (
-  req: Request,
+  req: AuthenticatedRequest,
   res: Response
 ): Promise<void> => {
   const { message } = req.body;
@@ -38,14 +45,23 @@ export const addMessage = async (
     return;
   }
 
-  if (!req.session?.user?._id) {
-    res.status(500).json({ error: 'You are not authenticated' });
+  // Use req.user from JWT token instead of session
+  if (!req.user) {
+    res.status(401).json({ error: 'You are not authenticated' });
     return;
   }
 
-  message.user = req.session.user._id;
-
+  // Find the user in the database to get the _id
   try {
+    const user = await userModel.findOne({ email: req.user.email });
+    
+    if (!user) {
+      res.status(401).json({ error: 'User not found' });
+      return;
+    }
+
+    message.user = user._id;
+
     const messageObj = new MessageModel(message);
     await messageObj.save();
     res.status(200).json(messageObj);
@@ -59,7 +75,7 @@ export const addMessage = async (
 };
 
 export const editMessage = async (
-  req: Request,
+  req: AuthenticatedRequest,
   res: Response
 ): Promise<void> => {
   const { name } = req.body;

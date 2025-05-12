@@ -13,7 +13,7 @@ services:
     env_file:
       - .env.production
     depends_on:
-      - mongodb
+      - mongo
       - postgres
       - redis
     networks:
@@ -35,11 +35,11 @@ services:
         max_attempts: 3
         window: 120s
 
-  mongodb:
+  mongo:
     image: mongo:latest
-    container_name: mongodb-prod
+    container_name: mongo-prod
     volumes:
-      - mongodb_data:/data/db
+      - mongo_data:/data/db
     environment:
       MONGO_INITDB_DATABASE: epita
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME:-mongo_production_user}
@@ -66,7 +66,7 @@ services:
     environment:
       ME_CONFIG_MONGODB_SERVER: mongo
       ME_CONFIG_MONGODB_PORT: 27017
-      ME_CONFIG_MONGODB_URL: mongodb://mongodb:27017
+      ME_CONFIG_MONGODB_URL: mongodb://mongo:27017
       ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_USERNAME:-mongo_production_user}
       ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_PASSWORD:-prod_mongo_secure_pwd}
       ME_CONFIG_BASICAUTH_USERNAME: ${MONGO_EXPRESS_USER:-admin}
@@ -77,7 +77,7 @@ services:
     networks:
       - app-network
     depends_on:
-      mongodb:
+      mongo:
         condition: service_healthy
     restart: always
     deploy:
@@ -86,11 +86,11 @@ services:
           cpus: '0.25'
           memory: 256M
 
-  mongodb_backup:
+  mongo_backup:
     image: mongo:latest
-    container_name: mongodb-backup
+    container_name: mongo-backup
     volumes:
-      - mongodb_backup_data:/data/db
+      - mongo_backup_data:/data/db
     environment:
       MONGO_INITDB_DATABASE: epita
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME:-mongo_production_user}
@@ -99,7 +99,7 @@ services:
       - app-network
     restart: always
     depends_on:
-      - mongodb
+      - mongo
     command: mongod --replSet rs0 --port 27018
 
   postgres:
@@ -175,8 +175,8 @@ services:
           memory: 512M
 
 volumes:
-  mongodb_data:
-  mongodb_backup_data:
+  mongo_data:
+  mongo_backup_data:
   postgres_data:
   postgres_replica_data:
   redis_data:

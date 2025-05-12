@@ -16,7 +16,7 @@ services:
     env_file:
       - .env.release
     depends_on:
-      - mongodb
+      - mongo
       - postgres
     networks:
       - app-network
@@ -27,13 +27,13 @@ services:
           cpus: '0.50'
           memory: 512M
 
-  mongodb:
+  mongo:
     image: mongo:latest
-    container_name: mongodb-release
+    container_name: mongo-release
     ports:
       - "27017:27017"
     volumes:
-      - mongodb_data:/data/db
+      - mongo_data:/data/db
     environment:
       MONGO_INITDB_DATABASE: epita
     networks:
@@ -64,7 +64,7 @@ services:
     networks:
       - app-network
     depends_on:
-      mongodb:
+      mongo:
         condition: service_healthy
     restart: unless-stopped
     deploy:
@@ -95,7 +95,7 @@ services:
           memory: 512M
 
 volumes:
-  mongodb_data:
+  mongo_data:
   postgres_data:
 
 networks:

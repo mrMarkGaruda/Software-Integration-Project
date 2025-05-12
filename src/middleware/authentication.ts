@@ -5,7 +5,6 @@ import logger from './winston';
 
 interface JwtPayload {
   user: {
-    id: string;
     email: string;
   };
 }
@@ -14,20 +13,37 @@ const verifyToken = (req: Request, res: Response, next: NextFunction): void => {
   const header = req.header('Authorization');
 
   if (!header) {
-    res.status(unauthorized).json({ error: 'Unauthorized' });
+    res.status(unauthorized).json({ error: 'No Authorization header' });
     return;
   }
 
   const token = header.split(' ')[1];
 
+  if (!token) {
+    res.status(unauthorized).json({ error: 'No token provided' });
+    return;
+  }
+
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY!) as JwtPayload;
+    if (!process.env.JWT_SECRET_KEY) {
+      throw new Error('JWT secret key is not defined');
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY) as JwtPayload;
+    
+    // Attach user to the request object
     req.user = decoded.user;
     next();
   } catch (error: unknown) {
-    logger.error(error);
-    res.status(unauthorized).json({ error: 'Invalid token' });
-    return;
+    logger.error('Token verification error:', error);
+    
+    if (error instanceof jwt.TokenExpiredError) {
+      res.status(unauthorized).json({ error: 'Token expired' });
+    } else if (error instanceof jwt.JsonWebTokenError) {
+      res.status(unauthorized).json({ error: 'Invalid token' });
+    } else {
+      res.status(unauthorized).json({ error: 'Authentication failed' });
+    }
   }
 };
 
