@@ -3,71 +3,68 @@ name: Postman API Tests with Docker
 on:
   pull_request:
     branches: [dev, release, pprod, prod]
-  workflow_dispatch:  # Allow manual triggering
+  workflow_dispatch: # Allow manual triggering
 
 jobs:
   postman-tests:
     runs-on: ubuntu-latest
-    
+
     steps:
     - uses: actions/checkout@v4.2.2
-    
-    # Setup Docker Compose
+
+    # Setup Docker Compose (Keep as is)
     - name: Set up Docker Compose
       run: |
         sudo curl -L "https://github.com/docker/compose/releases/download/v2.23.3/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
         sudo chmod +x /usr/local/bin/docker-compose
-    
-    # Setup Node.js
+
+    # Setup Node.js (Keep as is)
     - name: Use Node.js
       uses: actions/setup-node@v4
       with:
         node-version: '18'
-    
-    # Build and start Docker services
+
+    # Build and start Docker services (Keep as is, but ensure app is built)
     - name: Build and Start Docker Services
       run: |
-        docker-compose -f docker-compose.dev.yml up --build -d
-        
-    # Wait for services to be ready
+        # It's good practice to explicitly build the app before starting if you're using build context
+        docker-compose -f docker-compose.dev.yml build app
+        # Start only the necessary services (app, mongo, postgres) in detached mode
+        docker-compose -f docker-compose.dev.yml up --build -d app mongo postgres
+
+    # Wait for services to be ready (REPLACE THIS STEP)
     - name: Wait for Services to be Ready
       run: |
-        # Wait for the app to be ready (adjust timeout and check as needed)
-        max_attempts=30
-        attempt=0
-        while [ $attempt -lt $max_attempts ]; do
-          if curl -s http://localhost:8080/api/health > /dev/null; then
-            echo "Service is up and running!"
-            break
-          fi
-          echo "Waiting for service to be ready... (attempt $attempt)"
-          sleep 5
-          attempt=$((attempt+1))
-        done
-        
-        if [ $attempt -eq $max_attempts ]; then
-          echo "Service did not become ready in time"
-          docker-compose -f docker-compose.dev.yml logs
-          exit 1
-        fi
-    
-    # Install Newman CLI globally
+        echo "Waiting for 'app' service to become healthy..."
+        # Use docker-compose healthcheck to wait.
+        # --retries -1 means wait forever until healthy or manual timeout
+        # --interval 1s is the checking interval by the command itself, not the healthcheck interval
+        # --timeout 300s is the total command timeout (5 minutes)
+        # You can adjust the 300s timeout as needed.
+        # The 'app' argument specifies which service's health to wait for.
+        docker-compose -f docker-compose.dev.yml healthcheck --retries -1 --interval 1s --timeout 300s app
+        echo "'app' service is healthy!"
+      # Add a step timeout in case docker-compose healthcheck hangs unexpectedly
+      timeout-minutes: 6 # Set workflow step timeout slightly higher than healthcheck timeout
+
+
+    # Install Newman CLI globally (Keep as is)
     - name: Install Newman
       run: npm install -g newman newman-reporter-htmlextra
-    
-    # Create directory for test reports
+
+    # Create directory for test reports (Keep as is)
     - name: Create Reports Directory
       run: mkdir -p newman-reports
-    
-    # Run Postman Collection Tests
+
+    # Run Postman Collection Tests (Keep as is)
     - name: Run Postman Collection Tests
       run: |
         newman run "postman/collection.json" \
           -e "postman/environment.json" \
           -r htmlextra \
           --reporter-htmlextra-export newman-reports/report.html
-    
-    # Upload test results as artifact
+
+    # Upload test results as artifact (Keep as is)
     - name: Upload Test Results
       uses: actions/upload-artifact@v4
       if: always()
@@ -75,16 +72,18 @@ jobs:
         name: postman-test-results
         path: newman-reports
         retention-days: 7
-    
-    # Stop Docker services
+
+    # Stop Docker services (Keep as is)
     - name: Stop Docker Services
       if: always()
       run: docker-compose -f docker-compose.dev.yml down
-    
-    # Check test results and fail if tests fail
+
+    # Check test results and fail if tests fail (Keep as is)
     - name: Check Test Results
       run: |
         if [ $(find newman-reports -name "*.html" | wc -l) -eq 0 ]; then
           echo "No test reports found"
+          # Optionally, check Newman exit code or report contents for test failures
+          # For now, this check only ensures a report file was generated.
           exit 1
         fi
